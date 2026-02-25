@@ -32,7 +32,7 @@ def _make_mock_config(
     config.team_id = TEAM_ID
     config.platform = platform
     config.webhook_url = (
-        "https://hooks.slack.test/services/FAKE_XXXXX"
+        "https://hooks.slack.com/services/fake-test-url"
         if platform == "slack"
         else "https://outlook.office.com/webhook/test"
     )
@@ -192,7 +192,7 @@ class TestCreateNotificationConfig:
                 "/api/v1/notifications/config",
                 json={
                     "platform": "slack",
-                    "webhook_url": "https://hooks.slack.test/services/FAKE_XXXXX",
+                    "webhook_url": "https://hooks.slack.com/services/fake-test-url",
                     "severity_threshold": "all",
                     "weekly_report_enabled": False,
                     "weekly_report_day": 1,

@@ -37,7 +37,7 @@ def sample_notification_config():
     config.id = uuid.UUID("11111111-1111-1111-1111-111111111111")
     config.team_id = uuid.UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
     config.platform = "slack"
-    config.webhook_url = "https://hooks.slack.test/services/FAKE_TOKEN_FOR_TESTING"
+    config.webhook_url = "https://hooks.slack.com/services/fake-test-token"
     config.severity_threshold = "all"
     config.weekly_report_enabled = True
     config.weekly_report_day = 1
@@ -75,7 +75,7 @@ class TestValidateWebhookUrl:
         """유효한 Slack webhook URL 검증"""
         from src.services.notification_service import validate_webhook_url
 
-        url = "https://hooks.slack.test/services/FAKE_XXXXXXXX"
+        url = "https://hooks.slack.com/services/fake-test-url"
         assert validate_webhook_url(url) is True
 
     def test_valid_teams_url(self):
@@ -96,7 +96,7 @@ class TestValidateWebhookUrl:
         """HTTP URL 거부 (HTTPS 필수)"""
         from src.services.notification_service import validate_webhook_url
 
-        url = "http://hooks.slack.test/services/FAKE_XXXXXXXX"
+        url = "http://hooks.slack.com/services/fake-test-url"
         assert validate_webhook_url(url) is False
 
     def test_invalid_domain_rejected(self):
