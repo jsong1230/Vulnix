@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { SummaryCard } from '@/components/dashboard/summary-card';
 import { RecentVulnerabilities } from '@/components/dashboard/recent-vulnerabilities';
 import { RecentScans } from '@/components/dashboard/recent-scans';
+import { SeverityChart } from '@/components/dashboard/severity-chart';
 import { useDashboardSummary } from '@/lib/hooks/use-dashboard';
 import { useVulnerabilityList } from '@/lib/hooks/use-vulnerabilities';
 
@@ -96,28 +97,75 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* 최근 스캔 섹션 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 최근 취약점 목록 */}
+      {/* 심각도 분포 + 최근 스캔 섹션 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* 심각도 분포 차트 */}
         <div className="card p-6">
-          <h2 className="text-base font-semibold text-white mb-4">
-            {t('dashboard.recentVulnerabilities')}
-          </h2>
-          {vulnsLoading ? (
-            /* 취약점 목록 로딩 스켈레톤 */
-            <div className="space-y-2 animate-pulse">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3">
-                  <div className="h-5 w-14 bg-gray-700 rounded" />
-                  <div className="flex-1">
-                    <div className="h-3 bg-gray-700 rounded w-3/4 mb-1.5" />
-                    <div className="h-2 bg-gray-800 rounded w-1/2" />
-                  </div>
+          <h2 className="text-base font-semibold text-white mb-4">심각도 분포</h2>
+          {summaryLoading ? (
+            <div className="space-y-3 animate-pulse">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-3 w-14 bg-gray-700 rounded" />
+                  <div className="flex-1 h-2 bg-gray-700 rounded-full" />
+                  <div className="h-3 w-6 bg-gray-700 rounded" />
                 </div>
               ))}
             </div>
           ) : (
-            <RecentVulnerabilities vulnerabilities={vulnsData?.items ?? []} />
+            <SeverityChart
+              distribution={
+                summary?.severityDistribution ?? { critical: 0, high: 0, medium: 0, low: 0 }
+              }
+            />
+          )}
+        </div>
+
+        {/* 처리 상태 */}
+        <div className="card p-6">
+          <h2 className="text-base font-semibold text-white mb-4">처리 상태</h2>
+          {summaryLoading ? (
+            <div className="space-y-3 animate-pulse">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-3 w-16 bg-gray-700 rounded" />
+                  <div className="flex-1 h-2 bg-gray-700 rounded-full" />
+                  <div className="h-3 w-6 bg-gray-700 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {[
+                { label: '미해결', key: 'open' as const, color: 'bg-red-500' },
+                { label: '패치됨', key: 'patched' as const, color: 'bg-green-500' },
+                { label: '무시됨', key: 'ignored' as const, color: 'bg-gray-500' },
+                { label: '오탐', key: 'false_positive' as const, color: 'bg-yellow-500' },
+              ].map(({ label, key, color }) => {
+                const total = Object.values(summary?.statusDistribution ?? {}).reduce(
+                  (a: number, b) => a + (b as number),
+                  0,
+                );
+                const count = summary?.statusDistribution[key] ?? 0;
+                const pct = total > 0 ? (count / total) * 100 : 0;
+                return (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-400 w-14 shrink-0">{label}</span>
+                    <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${color}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-300 w-6 text-right shrink-0">{count}</span>
+                  </div>
+                );
+              })}
+              <div className="pt-1 border-t border-gray-800 flex items-center justify-between text-xs text-gray-500">
+                <span>해결률</span>
+                <span className="text-gray-300">{Math.round(summary?.resolutionRate ?? 0)}%</span>
+              </div>
+            </div>
           )}
         </div>
 
@@ -127,7 +175,6 @@ export default function DashboardPage() {
             {t('dashboard.recentScans')}
           </h2>
           {summaryLoading ? (
-            /* 스캔 목록 로딩 스켈레톤 */
             <div className="space-y-2 animate-pulse">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-3">
@@ -141,6 +188,32 @@ export default function DashboardPage() {
             </div>
           ) : (
             <RecentScans scans={summary?.recentScans ?? []} />
+          )}
+        </div>
+      </div>
+
+      {/* 최근 취약점 */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* 최근 취약점 목록 */}
+        <div className="card p-6">
+          <h2 className="text-base font-semibold text-white mb-4">
+            {t('dashboard.recentVulnerabilities')}
+          </h2>
+          {vulnsLoading ? (
+            /* 취약점 목록 로딩 스켈레톤 */
+            <div className="space-y-2 animate-pulse">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 p-3">
+                  <div className="h-5 w-14 bg-gray-700 rounded" />
+                  <div className="flex-1">
+                    <div className="h-3 bg-gray-700 rounded w-3/4 mb-1.5" />
+                    <div className="h-2 bg-gray-800 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <RecentVulnerabilities vulnerabilities={vulnsData?.items ?? []} />
           )}
         </div>
       </div>
