@@ -21,7 +21,7 @@
 | **보안 대시보드** | 저장소/팀별 보안 점수, 취약점 추이 그래프, 심각도별 분포 |
 | **알림 연동** | Slack Block Kit / Microsoft Teams Adaptive Cards, 주간 리포트 자동 발송 |
 | **CISO 리포트** | PDF 자동 생성, CSAP / ISO 27001 / ISMS 인증 증적 자료 출력 |
-| **IDE 플러그인** | VS Code 실시간 분석 API, 인라인 패치 제안, API Key 기반 인증 |
+| **IDE 플러그인** | VS Code 파일 저장 시 자동 분석, 인라인 취약점 하이라이팅, 전구 클릭으로 패치 즉시 적용 |
 
 ---
 
@@ -68,6 +68,7 @@ GitHub / GitLab / Bitbucket
 | Frontend | Next.js 14, TypeScript, Tailwind CSS |
 | 인증 | JWT (Access/Refresh Token), API Key (SHA-256 해시) |
 | 보안 | Fernet 암호화 (PAT/App Password), SSRF 방어 |
+| VS Code 익스텐션 | TypeScript, VS Code Extension API, Jest |
 
 ---
 
@@ -143,6 +144,35 @@ npm run dev
 
 API 문서: http://localhost:8000/docs
 
+### 6. VS Code 익스텐션 설치 (개발 모드)
+
+```bash
+cd vscode-extension
+npm install
+npm run compile
+
+# VS Code에서 F5 → "Run Extension" 선택
+```
+
+VS Code 설정 (`settings.json`):
+
+```json
+{
+  "vulnix.serverUrl": "http://localhost:8000",
+  "vulnix.apiKey": "vx_live_...",
+  "vulnix.analyzeOnSave": true,
+  "vulnix.severityFilter": "all"
+}
+```
+
+API Key는 대시보드 또는 API로 발급:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/ide/api-keys \
+  -H "Authorization: Bearer {JWT}" \
+  -d '{"name": "My IDE Key", "expires_in_days": 365}'
+```
+
 ---
 
 ## 프로젝트 구조
@@ -184,6 +214,31 @@ Vulnix/
 │   └── src/
 │       ├── app/             # Next.js App Router 페이지
 │       └── components/      # UI 컴포넌트
+├── vscode-extension/
+│   ├── src/
+│   │   ├── extension.ts         # 진입점 (activate/deactivate)
+│   │   ├── config.ts            # 설정 관리 (serverUrl, apiKey)
+│   │   ├── api/
+│   │   │   ├── client.ts        # HTTP 클라이언트 (X-API-Key 인증)
+│   │   │   └── types.ts         # Finding, AnalyzeRequest 등 타입
+│   │   ├── analyzer/
+│   │   │   ├── analyzer.ts      # 분석 오케스트레이터 (500ms 디바운스)
+│   │   │   └── fp-cache.ts      # 오탐 패턴 캐시 (5분 주기 동기화)
+│   │   ├── diagnostics/
+│   │   │   ├── diagnostics.ts       # DiagnosticCollection 관리
+│   │   │   └── diagnostic-mapper.ts # Finding → vscode.Diagnostic 변환
+│   │   ├── code-actions/
+│   │   │   ├── code-actions.ts  # CodeActionProvider (전구 아이콘)
+│   │   │   └── patch-applier.ts # unified diff → WorkspaceEdit 적용
+│   │   ├── webview/
+│   │   │   ├── webview.ts       # 취약점 상세 WebviewPanel
+│   │   │   └── panel-content.ts # HTML 생성 (XSS 이스케이프)
+│   │   └── status/
+│   │       └── status-bar.ts    # 상태 표시줄 (연결/오프라인/분석중)
+│   ├── test/
+│   │   ├── suite/               # Jest 단위 테스트 (62 케이스)
+│   │   └── fixtures/            # 테스트 픽스처 (취약 코드, API 응답)
+│   └── package.json
 ├── docs/
 │   ├── project/             # PRD, 기능 백로그, 로드맵
 │   ├── specs/               # 기능별 설계 문서
@@ -218,10 +273,59 @@ Vulnix/
 ## 테스트 실행
 
 ```bash
+# 백엔드
 cd backend
 pytest tests/ -v
 # 518 tests, 0 failures
+
+# VS Code 익스텐션
+cd vscode-extension
+npm test
+# 62 tests, 0 failures
 ```
+
+---
+
+## VS Code 익스텐션
+
+### 동작 방식
+
+```
+파일 저장
+  └─ 500ms 디바운스
+       └─ POST /api/v1/ide/analyze (Semgrep, <500ms)
+            └─ 오탐 패턴 로컬 필터링
+                 └─ 빨간/노란 밑줄 표시
+
+전구 아이콘 클릭 → "Vulnix: Apply Patch Fix"
+  └─ POST /api/v1/ide/patch-suggestion (Claude API)
+       └─ unified diff 파싱 → WorkspaceEdit 적용
+```
+
+### 지원 기능
+
+| 기능 | 설명 |
+|------|------|
+| 자동 분석 | 파일 저장 시 Semgrep 기반 취약점 즉시 탐지 |
+| 인라인 하이라이팅 | critical/high → 빨간 밑줄, medium → 노란 밑줄, low → 파란 밑줄 |
+| 패치 적용 | 전구 아이콘 클릭 → LLM 패치 생성 → 코드 한 번에 수정 |
+| 상세 패널 | 취약점 유형, CWE/OWASP 분류, 코드 스니펫, 패치 diff 표시 |
+| 오탐 동기화 | 팀 오탐 패턴 5분 주기 자동 동기화 (ETag 캐싱) |
+| 상태 표시줄 | `$(shield) Vulnix: 3 issue(s)` — 연결/분석중/오프라인 상태 |
+
+### 지원 언어
+
+Python, JavaScript, TypeScript, Java, Go
+
+### VS Code 명령 팔레트
+
+| 명령 | 설명 |
+|------|------|
+| `Vulnix: Analyze Current File` | 현재 파일 수동 분석 |
+| `Vulnix: Apply Patch Fix` | 커서 위치 취약점 패치 적용 |
+| `Vulnix: Show Vulnerability Detail` | 상세 패널 열기 |
+| `Vulnix: Sync False Positive Patterns` | 오탐 패턴 수동 동기화 |
+| `Vulnix: Clear All Diagnostics` | 진단 전체 초기화 |
 
 ---
 
