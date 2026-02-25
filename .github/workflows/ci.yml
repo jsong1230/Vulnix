@@ -60,6 +60,9 @@ jobs:
           cache: pip
           cache-dependency-path: backend/pyproject.toml
 
+      - name: pip 업그레이드
+        run: pip install --upgrade pip setuptools wheel
+
       - name: 의존성 설치
         working-directory: backend
         run: pip install -e ".[dev]"
