@@ -29,12 +29,9 @@ from src.models import user, team, repository, scan_job, vulnerability, patch_pr
 
 settings = get_settings()
 
-# DATABASE_URL을 alembic config에 주입 (asyncpg -> psycopg2로 변환)
-# Alembic은 동기 드라이버를 사용하므로 변환 필요
-sync_database_url = settings.DATABASE_URL.replace(
-    "postgresql+asyncpg://", "postgresql://"
-)
-config.set_main_option("sqlalchemy.url", sync_database_url)
+# DATABASE_URL을 alembic config에 주입 (asyncpg URL 그대로 사용)
+# async_engine_from_config가 asyncpg를 사용하므로 변환 불필요
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # 마이그레이션 대상 메타데이터
 target_metadata = Base.metadata
