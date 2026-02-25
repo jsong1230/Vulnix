@@ -45,7 +45,7 @@ async def health_detailed() -> dict[str, object]:
         import redis.asyncio as aioredis
 
         r = aioredis.from_url(settings.REDIS_URL)
-        await r.ping()
+        await r.ping()  # type: ignore[misc]
         await r.aclose()
         checks["redis"] = "ok"
     except Exception as exc:

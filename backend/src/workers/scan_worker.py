@@ -130,15 +130,15 @@ async def _run_scan_async(message: ScanJobMessage) -> dict:
             # AsyncMock 환경에서는 scalar_one이 coroutine일 수 있으므로 await 처리
             scalar_one = db_result.scalar_one
             if asyncio.iscoroutinefunction(scalar_one):
-                repo = await scalar_one()
+                repo = await scalar_one()  # type: ignore[misc]
             else:
                 repo = scalar_one()
 
             # 3. git clone (임시 디렉토리)
             await github.clone_repository(
                 repo.full_name,
-                repo.installation_id,
-                message.commit_sha,
+                repo.installation_id or 0,  # installation_id: int | None → int
+                message.commit_sha or "",
                 temp_dir,
             )
 
@@ -215,7 +215,7 @@ async def _run_scan_async(message: ScanJobMessage) -> dict:
                 patch_gen = PatchGenerator()
                 patch_prs = await patch_gen.generate_patch_prs(
                     repo_full_name=repo.full_name,
-                    installation_id=repo.installation_id,
+                    installation_id=repo.installation_id or 0,
                     base_branch=repo.default_branch,
                     scan_job_id=uuid.UUID(message.job_id) if isinstance(message.job_id, str) else message.job_id,
                     repo_id=repo.id,

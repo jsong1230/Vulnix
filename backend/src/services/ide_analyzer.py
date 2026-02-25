@@ -143,7 +143,7 @@ class IdeAnalyzerService:
                 FalsePositivePattern.is_active == True,  # noqa: E712
             )
         )
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     def _apply_fp_filter(
         self,

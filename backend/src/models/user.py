@@ -1,7 +1,13 @@
 """User 모델 — GitHub OAuth 사용자"""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from src.models.team import TeamMember
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
 

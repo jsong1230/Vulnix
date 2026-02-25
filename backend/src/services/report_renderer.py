@@ -7,13 +7,29 @@ import json
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
+from typing import Any
 
+# reportlab 심볼 폴백 선언 (미설치 환경 대응)
+colors: Any = None
+A4: Any = None
+ParagraphStyle: Any = None
+getSampleStyleSheet: Any = None
+cm: Any = None
+HRFlowable: Any = None
+PageBreak: Any = None
+Paragraph: Any = None
+SimpleDocTemplate: Any = None
+Spacer: Any = None
+Table: Any = None
+TableStyle: Any = None
+
+REPORTLAB_AVAILABLE = False
 try:
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-    from reportlab.lib.units import cm
-    from reportlab.platypus import (
+    from reportlab.lib import colors  # type: ignore[import-untyped,no-redef]
+    from reportlab.lib.pagesizes import A4  # type: ignore[import-untyped,no-redef]
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet  # type: ignore[import-untyped,no-redef]
+    from reportlab.lib.units import cm  # type: ignore[import-untyped,no-redef]
+    from reportlab.platypus import (  # type: ignore[import-untyped,no-redef]
         HRFlowable,
         PageBreak,
         Paragraph,
@@ -24,7 +40,7 @@ try:
     )
     REPORTLAB_AVAILABLE = True
 except ImportError:
-    REPORTLAB_AVAILABLE = False
+    pass
 
 
 class ReportRenderer(ABC):

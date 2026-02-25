@@ -141,7 +141,7 @@ class PatchGenerator:
                 logger.warning(f"[PatchGenerator] 개별 PR 생성 실패: {r}")
                 continue
             if r is not None:
-                patch_prs.append(r)
+                patch_prs.append(r)  # type: ignore[arg-type]
 
         return patch_prs
 

@@ -1,13 +1,19 @@
 """Team / TeamMember 모델 — 팀 및 멤버 관계"""
+from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
+
+if TYPE_CHECKING:
+    from src.models.repository import Repository
+    from src.models.user import User
 
 
 class Team(UUIDMixin, Base):

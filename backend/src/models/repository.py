@@ -1,6 +1,8 @@
 """Repository 모델 — GitHub / GitLab / Bitbucket 저장소 연동 정보"""
+from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Numeric, String, Text
@@ -8,6 +10,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
+
+if TYPE_CHECKING:
+    from src.models.team import Team
+    from src.models.scan_job import ScanJob
+    from src.models.vulnerability import Vulnerability
 
 
 class Repository(UUIDMixin, TimestampMixin, Base):

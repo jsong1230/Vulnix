@@ -1,13 +1,19 @@
 """PatchPR 모델 — 자동 생성된 보안 패치 PR"""
+from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
+
+if TYPE_CHECKING:
+    from src.models.vulnerability import Vulnerability
+    from src.models.repository import Repository
 
 
 class PatchPR(UUIDMixin, Base):

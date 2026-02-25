@@ -187,7 +187,7 @@ async def generate_report(
     202를 즉시 반환하며, 완료 여부는 GET /history로 확인한다.
     """
     team_id, role = await _get_user_team_role(db, current_user.id)
-    _require_admin_role(team_id, role)
+    team_id = _require_admin_role(team_id, role)
 
     report_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
@@ -386,7 +386,7 @@ async def create_config(
     같은 팀에 동일 report_type이 존재하면 409를 반환한다.
     """
     team_id, role = await _get_user_team_role(db, current_user.id)
-    _require_admin_role(team_id, role)
+    team_id = _require_admin_role(team_id, role)
 
     now = datetime.now(timezone.utc)
     next_gen = calculate_next_generation(data.schedule, now)
@@ -498,7 +498,7 @@ async def update_config(
     부분 업데이트를 지원한다.
     """
     team_id, role = await _get_user_team_role(db, current_user.id)
-    _require_admin_role(team_id, role)
+    team_id = _require_admin_role(team_id, role)
 
     result = await db.execute(
         select(ReportConfig).where(
@@ -569,7 +569,7 @@ async def delete_config(
     owner/admin 권한이 필요하다.
     """
     team_id, role = await _get_user_team_role(db, current_user.id)
-    _require_admin_role(team_id, role)
+    team_id = _require_admin_role(team_id, role)
 
     result = await db.execute(
         select(ReportConfig).where(

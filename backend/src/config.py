@@ -98,4 +98,4 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """설정 싱글톤 반환 (앱 시작 시 한 번만 로드)"""
-    return Settings()
+    return Settings()  # type: ignore[call-arg]

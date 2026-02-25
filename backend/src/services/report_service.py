@@ -131,7 +131,11 @@ class ReportService:
         )[:10]
 
         # 보안 점수 (평균)
-        scores = [r.security_score for r in repositories if getattr(r, "security_score", None) is not None]
+        scores: list[float] = []
+        for r in repositories:
+            s = getattr(r, "security_score", None)
+            if s is not None:
+                scores.append(float(s))
         current_score = sum(scores) / len(scores) if scores else 0.0
 
         # 저장소 점수 랭킹
@@ -286,7 +290,7 @@ class ReportService:
             history.status = "completed"
             history.file_path = file_path
             history.file_size_bytes = file_size
-            history.metadata = {
+            history.report_meta = {
                 "security_score": data.current_security_score,
                 "total_vulnerabilities": data.total_vulnerabilities,
                 "critical_count": data.severity_distribution.get("critical", 0),

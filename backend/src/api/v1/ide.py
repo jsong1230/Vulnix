@@ -326,8 +326,8 @@ async def revoke_api_key(
     try:
         result = await service.revoke_key(key_id=key_id, team_id=team_id)
     except ValueError:
-        from fastapi.responses import JSONResponse
-        return JSONResponse(
+        from fastapi.responses import JSONResponse as _JSONResponse
+        return _JSONResponse(  # type: ignore[return-value]
             status_code=status.HTTP_404_NOT_FOUND,
             content={
                 "success": False,

@@ -2,12 +2,18 @@
 
 Repository 모델의 platform 필드에 따라 적절한 GitPlatformService 구현체를 반환한다.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from src.services.git_platform_service import GitPlatformService
 from src.services.token_crypto import decrypt_token
 
+if TYPE_CHECKING:
+    from src.models.repository import Repository
 
-def get_platform_service(repo: "Repository") -> GitPlatformService:  # noqa: F821
+
+def get_platform_service(repo: Repository) -> GitPlatformService:
     """Repository의 platform에 맞는 서비스 인스턴스를 반환한다.
 
     Args:
@@ -22,6 +28,8 @@ def get_platform_service(repo: "Repository") -> GitPlatformService:  # noqa: F82
     match repo.platform:
         case "github":
             from src.services.github_platform_service import GitHubPlatformService
+            if repo.installation_id is None:
+                raise ValueError("GitHub 저장소에 installation_id가 없습니다.")
             return GitHubPlatformService(installation_id=repo.installation_id)
         case "gitlab":
             from src.services.gitlab_service import GitLabPlatformService

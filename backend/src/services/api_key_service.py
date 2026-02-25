@@ -92,7 +92,7 @@ class ApiKeyService:
                 ApiKey.revoked_at == None,  # noqa: E711
             )
         )
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def revoke_key(
         self,

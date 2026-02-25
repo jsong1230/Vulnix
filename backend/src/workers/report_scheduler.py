@@ -7,6 +7,12 @@ report_config 테이블의 next_generation_at을 주기적으로 확인하여
 import uuid
 from datetime import datetime, timedelta, timezone
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.models.report_config import ReportConfig
+from src.models.report_history import ReportHistory
+
 
 def calculate_next_generation(schedule: str, current: datetime) -> datetime:
     """다음 생성 시각을 계산한다.
@@ -45,7 +51,7 @@ def calculate_next_generation(schedule: str, current: datetime) -> datetime:
         raise ValueError(f"지원하지 않는 주기: {schedule}")
 
 
-async def check_and_enqueue_reports(db: object) -> list[uuid.UUID]:
+async def check_and_enqueue_reports(db: AsyncSession) -> list[uuid.UUID]:
     """현재 시각 기준으로 생성이 필요한 리포트를 큐에 등록한다.
 
     1. report_config에서 is_active=True AND next_generation_at <= now 조회
@@ -58,12 +64,6 @@ async def check_and_enqueue_reports(db: object) -> list[uuid.UUID]:
     Returns:
         큐에 등록된 report_history ID 목록
     """
-    from sqlalchemy import select
-    from sqlalchemy.ext.asyncio import AsyncSession
-
-    from src.models.report_config import ReportConfig
-    from src.models.report_history import ReportHistory
-
     now = datetime.now(timezone.utc)
     queued_ids: list[uuid.UUID] = []
 

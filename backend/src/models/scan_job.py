@@ -1,6 +1,8 @@
 """ScanJob 모델 — 스캔 작업 생명주기 관리"""
+from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
@@ -8,6 +10,10 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base, TimestampMixin, UUIDMixin
+
+if TYPE_CHECKING:
+    from src.models.repository import Repository
+    from src.models.vulnerability import Vulnerability
 
 
 class ScanJob(UUIDMixin, TimestampMixin, Base):
