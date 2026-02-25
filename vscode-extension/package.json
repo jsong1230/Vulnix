@@ -79,7 +79,9 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "lint": "eslint src --ext ts",
-    "vscode:prepublish": "npm run compile"
+    "vscode:prepublish": "npm run compile",
+    "package": "npm run compile && npx @vscode/vsce package --no-dependencies",
+    "publish": "npm run compile && npx @vscode/vsce publish --no-dependencies"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
