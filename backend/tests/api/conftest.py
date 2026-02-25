@@ -7,8 +7,6 @@ sys.modules에 Mock을 주입한다.
 import sys
 from unittest.mock import MagicMock
 
-import pytest
-
 
 # ──────────────────────────────────────────────────────────────
 # redis / rq 모듈 Mock 주입 (패키지 미설치 환경 대응)
@@ -32,9 +30,9 @@ def _inject_redis_mock() -> None:
     if "redis.asyncio" not in sys.modules:
         asyncio_mock = MagicMock()
         asyncio_mock.from_url = MagicMock(return_value=MagicMock())
-        sys.modules["redis.asyncio"] = asyncio_mock
+        sys.modules["redis.asyncio"] = asyncio_mock  # type: ignore[assignment]
         # redis 패키지 속성으로도 등록
-        sys.modules["redis"].asyncio = asyncio_mock
+        setattr(sys.modules["redis"], "asyncio", asyncio_mock)  # type: ignore[arg-type]
 
     if "rq" not in sys.modules:
         rq_mock = MagicMock()
