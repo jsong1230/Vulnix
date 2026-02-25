@@ -1,0 +1,158 @@
+{
+  "analyze_success": {
+    "success": true,
+    "data": {
+      "findings": [
+        {
+          "rule_id": "python.sqlalchemy.security.sql-injection",
+          "severity": "high",
+          "message": "사용자 입력이 SQL 쿼리에 직접 삽입됩니다.",
+          "file_path": "src/api/routes/users.py",
+          "start_line": 42,
+          "end_line": 45,
+          "start_col": 8,
+          "end_col": 55,
+          "code_snippet": "db.execute(f\"SELECT * FROM users WHERE id = {user_id}\")",
+          "cwe_id": "CWE-89",
+          "owasp_category": "A03:2021 - Injection",
+          "vulnerability_type": "sql_injection",
+          "is_false_positive_filtered": false
+        },
+        {
+          "rule_id": "python.flask.security.xss",
+          "severity": "medium",
+          "message": "사용자 입력이 HTML에 이스케이프 없이 삽입됩니다.",
+          "file_path": "src/api/routes/users.py",
+          "start_line": 78,
+          "end_line": 78,
+          "start_col": 10,
+          "end_col": 40,
+          "code_snippet": "return render_template_string(user_input)",
+          "cwe_id": "CWE-79",
+          "owasp_category": "A03:2021 - Injection",
+          "vulnerability_type": "xss",
+          "is_false_positive_filtered": false
+        },
+        {
+          "rule_id": "python.secrets.hardcoded-password",
+          "severity": "critical",
+          "message": "하드코딩된 비밀번호가 감지되었습니다.",
+          "file_path": "src/config.py",
+          "start_line": 10,
+          "end_line": 10,
+          "start_col": 0,
+          "end_col": 32,
+          "code_snippet": "DB_PASSWORD = \"admin123\"",
+          "cwe_id": "CWE-259",
+          "owasp_category": "A07:2021 - Identification and Authentication Failures",
+          "vulnerability_type": "hardcoded_credentials",
+          "is_false_positive_filtered": false
+        },
+        {
+          "rule_id": "python.logging.sensitive-data",
+          "severity": "low",
+          "message": "민감 정보가 로그에 출력될 수 있습니다.",
+          "file_path": "src/utils/logger.py",
+          "start_line": 25,
+          "end_line": 25,
+          "start_col": 4,
+          "end_col": 50,
+          "code_snippet": "logging.info(f\"User password: {password}\")",
+          "cwe_id": "CWE-532",
+          "owasp_category": "A09:2021 - Security Logging and Monitoring Failures",
+          "vulnerability_type": "sensitive_data_logging",
+          "is_false_positive_filtered": false
+        }
+      ],
+      "analysis_duration_ms": 187,
+      "semgrep_version": "1.56.0"
+    },
+    "error": null
+  },
+  "analyze_empty": {
+    "success": true,
+    "data": {
+      "findings": [],
+      "analysis_duration_ms": 95,
+      "semgrep_version": "1.56.0"
+    },
+    "error": null
+  },
+  "auth_error_401": {
+    "success": false,
+    "data": null,
+    "error": {
+      "code": "INVALID_API_KEY",
+      "message": "API Key가 유효하지 않거나 누락되었습니다."
+    }
+  },
+  "server_error_500": {
+    "success": false,
+    "data": null,
+    "error": {
+      "code": "ANALYSIS_FAILED",
+      "message": "Semgrep 실행 중 오류가 발생했습니다."
+    }
+  },
+  "rate_limit_error_429": {
+    "success": false,
+    "data": null,
+    "error": {
+      "code": "RATE_LIMIT_EXCEEDED",
+      "message": "분당 요청 한도를 초과하였습니다. (60회/분)"
+    }
+  },
+  "false_positive_patterns": {
+    "success": true,
+    "data": {
+      "patterns": [
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440001",
+          "semgrep_rule_id": "python.flask.security.xss",
+          "file_pattern": "tests/**",
+          "reason": "테스트 코드에서 XSS 탐지 무시",
+          "is_active": true,
+          "updated_at": "2026-02-25T10:00:00Z"
+        },
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440002",
+          "semgrep_rule_id": "python.secrets.hardcoded-password",
+          "file_pattern": "tests/fixtures/**",
+          "reason": "테스트 픽스처에서 하드코딩 비밀번호 허용",
+          "is_active": true,
+          "updated_at": "2026-02-25T10:00:00Z"
+        },
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440003",
+          "semgrep_rule_id": "python.logging.sensitive-data",
+          "file_pattern": "scripts/**",
+          "reason": "배포 스크립트에서 로깅 허용",
+          "is_active": false,
+          "updated_at": "2026-02-24T09:00:00Z"
+        }
+      ],
+      "last_updated": "2026-02-25T10:00:00Z",
+      "etag": "\"abc123def456\""
+    },
+    "error": null
+  },
+  "patch_suggestion_success": {
+    "success": true,
+    "data": {
+      "patch_diff": "--- a/src/api/routes/users.py\n+++ b/src/api/routes/users.py\n@@ -42,4 +42,4 @@\n-    db.execute(f\"SELECT * FROM users WHERE id = {user_id}\")\n+    db.execute(text(\"SELECT * FROM users WHERE id = :user_id\"), {\"user_id\": user_id})",
+      "patch_description": "f-string SQL 쿼리를 파라미터 바인딩 방식으로 변경하여 SQL Injection을 방지합니다.",
+      "vulnerability_detail": {
+        "type": "sql_injection",
+        "severity": "high",
+        "cwe_id": "CWE-89",
+        "owasp_category": "A03:2021 - Injection",
+        "description": "사용자 입력값이 SQL 쿼리에 직접 삽입되면 공격자가 임의의 SQL을 실행할 수 있습니다.",
+        "references": [
+          "https://cwe.mitre.org/data/definitions/89.html",
+          "https://owasp.org/Top10/"
+        ]
+      }
+    },
+    "error": null
+  }
+}
