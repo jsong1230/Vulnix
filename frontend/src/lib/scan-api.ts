@@ -160,7 +160,47 @@ export interface VulnerabilityListParams {
   perPage?: number;
 }
 
+/**
+ * 스캔 목록 조회 필터 파라미터
+ */
+export interface ScanListParams {
+  repoId?: string;
+  status?: ScanStatus;
+  page?: number;
+  perPage?: number;
+}
+
+/**
+ * 스캔 목록 요약 항목
+ * GET /api/v1/scans 응답 data[] 항목
+ */
+export interface ScanSummary {
+  id: string;
+  repoId: string;
+  repoFullName: string | null;
+  status: ScanStatus;
+  triggerType: 'manual' | 'webhook' | 'schedule';
+  findingsCount: number;
+  truePositivesCount: number;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
 // ─── 백엔드 Raw 타입 (스네이크케이스) ────────────────────────────────────────────
+
+interface RawScanSummary {
+  id: string;
+  repo_id: string;
+  repo_full_name: string | null;
+  status: ScanStatus;
+  trigger_type: 'manual' | 'webhook' | 'schedule';
+  findings_count: number;
+  true_positives_count: number;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
 
 interface RawScanDetail {
   id: string;
@@ -255,6 +295,21 @@ interface RawDashboardSummary {
 }
 
 // ─── 변환 헬퍼 ─────────────────────────────────────────────────────────────────
+
+function toScanSummary(raw: RawScanSummary): ScanSummary {
+  return {
+    id: raw.id,
+    repoId: raw.repo_id,
+    repoFullName: raw.repo_full_name,
+    status: raw.status,
+    triggerType: raw.trigger_type,
+    findingsCount: raw.findings_count,
+    truePositivesCount: raw.true_positives_count,
+    startedAt: raw.started_at,
+    completedAt: raw.completed_at,
+    createdAt: raw.created_at,
+  };
+}
 
 function toScanDetail(raw: RawScanDetail): ScanDetail {
   return {
@@ -351,6 +406,39 @@ function toDashboardSummary(raw: RawDashboardSummary): DashboardSummary {
 }
 
 // ─── API 함수 ──────────────────────────────────────────────────────────────────
+
+/**
+ * 스캔 목록 조회 (필터 지원)
+ * GET /api/v1/scans
+ */
+export async function getScans(
+  params: ScanListParams = {},
+): Promise<PaginatedResponse<ScanSummary>> {
+  const queryParams: Record<string, string | number> = {};
+  if (params.repoId) queryParams.repo_id = params.repoId;
+  if (params.status) queryParams.status = params.status;
+  if (params.page) queryParams.page = params.page;
+  if (params.perPage) queryParams.per_page = params.perPage;
+
+  const response = await apiClient.get<ApiResponse<RawScanSummary[]>>(
+    '/api/v1/scans',
+    { params: queryParams },
+  );
+  if (!response.data.success || !response.data.data) {
+    throw new Error(response.data.error ?? '스캔 목록을 가져오지 못했습니다.');
+  }
+
+  const rawMeta = response.data.meta as (typeof response.data.meta & { total_pages?: number }) | undefined;
+  return {
+    items: response.data.data.map(toScanSummary),
+    meta: {
+      page: rawMeta?.page ?? 1,
+      per_page: rawMeta?.per_page ?? 20,
+      total: rawMeta?.total ?? 0,
+      total_pages: rawMeta?.total_pages ?? 1,
+    },
+  };
+}
 
 /**
  * 스캔 상세 조회

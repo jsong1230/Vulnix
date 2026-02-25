@@ -3,16 +3,35 @@
  * F-04 설계서 5-1절 기준
  */
 import { useQuery } from '@tanstack/react-query';
-import { getScan } from '@/lib/scan-api';
+import { getScan, getScans, type ScanListParams } from '@/lib/scan-api';
 
 // ─── Query Keys ────────────────────────────────────────────────────────────────
 
 export const scanKeys = {
   all: ['scans'] as const,
+  lists: () => ['scans', 'list'] as const,
+  list: (params: ScanListParams) => ['scans', 'list', params] as const,
   detail: (id: string) => ['scans', id] as const,
 };
 
 // ─── 훅 ───────────────────────────────────────────────────────────────────────
+
+/**
+ * 스캔 목록 조회 훅
+ * 페이지네이션 시 이전 데이터 유지 (깜빡임 방지)
+ */
+export function useScans(
+  params: ScanListParams = {},
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: scanKeys.list(params),
+    queryFn: () => getScans(params),
+    staleTime: 30 * 1000,
+    placeholderData: (previousData) => previousData,
+    enabled: options?.enabled ?? true,
+  });
+}
 
 /**
  * 스캔 상세 조회 훅
