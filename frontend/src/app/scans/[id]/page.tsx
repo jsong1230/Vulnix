@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { SeverityBadge } from '@/components/vulnerability/severity-badge';
 import { useScanDetail } from '@/lib/hooks/use-scans';
 import { useVulnerabilityList } from '@/lib/hooks/use-vulnerabilities';
@@ -10,28 +11,21 @@ interface ScanDetailPageProps {
   params: { id: string };
 }
 
-/** 스캔 상태별 배지 표시 설정 */
-const statusConfig: Record<
-  ScanStatus,
-  { label: string; color: string; bgColor: string }
-> = {
+/** 스캔 상태별 배지 스타일 설정 */
+const statusStyle: Record<ScanStatus, { color: string; bgColor: string }> = {
   queued: {
-    label: '대기 중',
     color: 'text-yellow-400',
     bgColor: 'bg-yellow-400/10',
   },
   running: {
-    label: '스캔 중',
     color: 'text-blue-400',
     bgColor: 'bg-blue-400/10',
   },
   completed: {
-    label: '완료',
     color: 'text-green-400',
     bgColor: 'bg-green-400/10',
   },
   failed: {
-    label: '실패',
     color: 'text-red-400',
     bgColor: 'bg-red-400/10',
   },
@@ -54,6 +48,7 @@ function formatDuration(seconds: number): string {
  * queued/running 상태일 때 2초 간격 자동 폴링
  */
 export default function ScanDetailPage({ params }: ScanDetailPageProps) {
+  const t = useTranslations();
   const { id } = params;
 
   // 스캔 상세 조회 (자동 폴링 포함)
@@ -118,7 +113,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
     );
   }
 
-  const statusDisplay = statusConfig[scan.status];
+  const statusDisplay = statusStyle[scan.status];
   const vulnerabilities = vulnsData?.items ?? [];
 
   return (
@@ -126,7 +121,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
       {/* 브레드크럼 */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <Link href="/repos" className="hover:text-gray-300 transition-colors">
-          저장소
+          {t('repos.title')}
         </Link>
         <span>/</span>
         <Link
@@ -151,7 +146,7 @@ export default function ScanDetailPage({ params }: ScanDetailPageProps) {
               {scan.status === 'running' && (
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
               )}
-              {statusDisplay.label}
+              {t(`scan.status.${scan.status}`)}
             </span>
             <h1 className="text-xl font-bold text-white">스캔 결과</h1>
           </div>

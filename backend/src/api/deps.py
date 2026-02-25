@@ -12,8 +12,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.config import get_settings
+from src.i18n import Locale, get_locale_from_header
 from src.models.api_key import ApiKey
-from src.models.team import TeamMember
 from src.models.user import User
 
 settings = get_settings()
@@ -98,8 +98,8 @@ async def get_current_user(
 
 
 async def get_api_key(
+    db: Annotated[AsyncSession, Depends(get_db)],
     x_api_key: Annotated[str | None, Header(alias="X-Api-Key")] = None,
-    db: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> "ApiKey":
     """X-Api-Key 헤더로 인증하고 ApiKey 객체를 반환한다. IDE 전용 엔드포인트에서 사용.
 
@@ -160,7 +160,13 @@ async def get_api_key(
     return api_key
 
 
+def get_locale(accept_language: str | None = Header(default=None)) -> Locale:
+    """Accept-Language 헤더에서 로케일을 감지하여 반환한다."""
+    return get_locale_from_header(accept_language)
+
+
 # 타입 별칭 — 라우터에서 간결하게 사용
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 IdeApiKey = Annotated["ApiKey", Depends(get_api_key)]
+CurrentLocale = Annotated[Locale, Depends(get_locale)]

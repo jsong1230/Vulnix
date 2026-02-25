@@ -6,7 +6,8 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.deps import CurrentUser, DbSession
+from src.api.deps import CurrentLocale, CurrentUser, DbSession
+from src.i18n import Locale, get_message
 from src.models.repository import Repository
 from src.models.scan_job import ScanJob
 from src.schemas.common import ApiResponse, PaginatedMeta, PaginatedResponse
@@ -257,6 +258,7 @@ async def register_repo(
     request: RepositoryRegisterRequest,
     current_user: CurrentUser,
     db: DbSession,
+    locale: CurrentLocale,
 ) -> ApiResponse[RepositoryResponse]:
     """저장소를 연동 등록하고 초기 스캔을 큐에 등록한다."""
     # 중복 확인
@@ -264,7 +266,7 @@ async def register_repo(
     if existing is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"이미 등록된 저장소입니다: github_repo_id={request.github_repo_id}",
+            detail=get_message("repo_already_exists", locale),
         )
 
     # 현재 사용자의 팀 조회 (첫 번째 팀 사용, 없으면 임시 UUID)
@@ -302,6 +304,7 @@ async def disconnect_repo(
     repo_id: uuid.UUID,
     current_user: CurrentUser,
     db: DbSession,
+    locale: CurrentLocale,
 ) -> ApiResponse[dict]:
     """저장소 연동을 해제하고 관련 데이터를 정리한다."""
     # 저장소 조회
@@ -309,7 +312,7 @@ async def disconnect_repo(
     if repo is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"저장소를 찾을 수 없습니다: {repo_id}",
+            detail=get_message("repo_not_found", locale),
         )
 
     # 권한 확인 (owner / admin만 허용, 허용 목록 방식)
@@ -321,7 +324,7 @@ async def disconnect_repo(
     if role not in ("owner", "admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="저장소 삭제 권한이 없습니다.",
+            detail=get_message("repo_access_denied", locale),
         )
 
     # 진행 중인 스캔 취소 (SQLALCHEMY UPDATE)

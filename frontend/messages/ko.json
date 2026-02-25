@@ -17,6 +17,9 @@
     "dashboard": "대시보드",
     "repos": "저장소",
     "vulnerabilities": "취약점",
+    "notifications": "알림 설정",
+    "reports": "CISO 리포트",
+    "falsePositives": "오탐 관리",
     "settings": "설정",
     "login": "로그인",
     "logout": "로그아웃"
@@ -29,7 +32,13 @@
     "recentScans": "최근 스캔",
     "recentVulnerabilities": "최근 취약점",
     "noScans": "스캔 기록이 없습니다",
-    "noVulnerabilities": "취약점이 없습니다"
+    "noVulnerabilities": "취약점이 없습니다",
+    "trend": "취약점 추이",
+    "repoScores": "저장소별 보안 점수",
+    "severityDist": "심각도 분포",
+    "thisWeek": "이번 주",
+    "lastWeek": "지난 주",
+    "score": "점수"
   },
   "repos": {
     "title": "저장소",
@@ -51,6 +60,8 @@
     },
     "status": {
       "open": "미해결",
+      "patched": "패치 완료",
+      "ignored": "무시됨",
       "fixed": "수정됨",
       "false_positive": "오탐",
       "accepted_risk": "위험 수용"
@@ -65,7 +76,8 @@
   "scan": {
     "status": {
       "pending": "대기 중",
-      "running": "실행 중",
+      "queued": "대기 중",
+      "running": "스캔 중",
       "completed": "완료",
       "failed": "실패"
     },
@@ -79,5 +91,45 @@
     "subtitle": "GitHub 계정으로 로그인하여 저장소의 보안을 강화하세요",
     "loginWithGitHub": "GitHub으로 로그인",
     "description": "AI 기반 보안 취약점 탐지 & 자동 패치"
+  },
+  "notifications": {
+    "title": "알림 설정",
+    "addSlack": "Slack 추가",
+    "addTeams": "Teams 추가",
+    "webhookUrl": "Webhook URL",
+    "severityThreshold": "알림 심각도",
+    "weeklyReport": "주간 리포트",
+    "testSend": "테스트 발송",
+    "deleteConfirm": "이 알림 설정을 삭제하시겠습니까?",
+    "noConfigs": "등록된 알림 설정이 없습니다"
+  },
+  "reports": {
+    "title": "CISO 리포트",
+    "generate": "리포트 생성",
+    "type": "리포트 유형",
+    "period": "기간",
+    "download": "다운로드",
+    "generating": "생성 중...",
+    "noReports": "생성된 리포트가 없습니다"
+  },
+  "settings": {
+    "title": "설정",
+    "apiKeys": "API Key 관리",
+    "team": "팀 설정",
+    "newKey": "새 Key 발급",
+    "keyName": "Key 이름",
+    "expiresIn": "유효 기간",
+    "revoke": "비활성화",
+    "copyKey": "복사",
+    "keyCopied": "복사됨!",
+    "noKeys": "발급된 API Key가 없습니다"
+  },
+  "falsePositives": {
+    "title": "오탐 패턴 관리",
+    "addPattern": "패턴 등록",
+    "ruleId": "룰 ID",
+    "filePattern": "파일 패턴",
+    "reason": "사유",
+    "noPatterns": "등록된 오탐 패턴이 없습니다"
   }
 }

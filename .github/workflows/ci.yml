@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Backend 테스트 ────────────────────────────────────────────────────────
+  backend-test:
+    name: Backend Test (Python 3.11)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: vulnix_test
+          POSTGRES_USER: vulnix
+          POSTGRES_PASSWORD: vulnix_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://vulnix:vulnix_test@localhost:5432/vulnix_test
+      REDIS_URL: redis://localhost:6379
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      JWT_SECRET_KEY: test-secret-key-for-ci-only
+      TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY }}
+      GITHUB_APP_ID: "12345"
+      GITHUB_APP_PRIVATE_KEY: "test-key"
+      GITHUB_WEBHOOK_SECRET: "test-secret"
+      GITHUB_CLIENT_ID: "test-client-id"
+      GITHUB_CLIENT_SECRET: "test-client-secret"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: 의존성 설치
+        working-directory: backend
+        run: pip install -e ".[dev]"
+
+      - name: DB 마이그레이션
+        working-directory: backend
+        run: alembic upgrade head
+
+      - name: 테스트 실행
+        working-directory: backend
+        run: pytest tests/ --tb=short -q
+
+  # ── Frontend 빌드 ─────────────────────────────────────────────────────────
+  frontend-build:
+    name: Frontend Build (Node.js 18)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 18 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 의존성 설치
+        working-directory: frontend
+        run: npm ci
+
+      - name: 빌드
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+
+  # ── VSCode Extension 테스트 ───────────────────────────────────────────────
+  vscode-extension-test:
+    name: VSCode Extension Test (Node.js 18)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 18 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: 의존성 설치
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: 테스트 실행
+        working-directory: vscode-extension
+        run: npm test

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { SeverityBadge } from '@/components/vulnerability/severity-badge';
 import { CodeViewer } from '@/components/vulnerability/code-viewer';
 import { PatchDiffViewer } from '@/components/vulnerability/patch-diff-viewer';
@@ -14,14 +15,6 @@ import type { VulnerabilityStatus } from '@/lib/scan-api';
 interface VulnDetailPageProps {
   params: { id: string };
 }
-
-/** 취약점 처리 상태 한국어 레이블 */
-const statusLabelMap: Record<VulnerabilityStatus, string> = {
-  open: '미해결',
-  patched: '패치 완료',
-  ignored: '무시됨',
-  false_positive: '오탐',
-};
 
 /** 취약점 처리 상태 배지 스타일 */
 const statusStyleMap: Record<VulnerabilityStatus, string> = {
@@ -39,6 +32,7 @@ const statusStyleMap: Record<VulnerabilityStatus, string> = {
 export default function VulnerabilityDetailPage({
   params,
 }: VulnDetailPageProps) {
+  const t = useTranslations();
   const { id } = params;
 
   const {
@@ -98,7 +92,7 @@ export default function VulnerabilityDetailPage({
       {/* 브레드크럼 */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <Link href="/repos" className="hover:text-gray-300 transition-colors">
-          저장소
+          {t('repos.title')}
         </Link>
         <span>/</span>
         {vuln.repoId && (
@@ -124,7 +118,7 @@ export default function VulnerabilityDetailPage({
             <span
               className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium ${statusStyleMap[vuln.status]}`}
             >
-              {statusLabelMap[vuln.status]}
+              {t(`vulnerability.status.${vuln.status}`)}
             </span>
             <h1 className="text-xl font-bold text-white">
               {vuln.vulnerabilityType}

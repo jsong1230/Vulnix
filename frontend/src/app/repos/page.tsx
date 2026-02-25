@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { getRepos, type Repository } from '@/lib/repos-api';
 import { RepoCard } from '@/components/repos/repo-card';
 
@@ -10,6 +11,7 @@ import { RepoCard } from '@/components/repos/repo-card';
  * GET /api/v1/repos 호출로 실제 데이터 사용
  */
 export default function ReposPage() {
+  const t = useTranslations();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export default function ReposPage() {
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">저장소</h1>
+          <h1 className="text-2xl font-bold text-white">{t('repos.title')}</h1>
           <p className="text-gray-400 mt-1 text-sm">
             Vulnix와 연동된 GitHub 저장소 목록
           </p>
@@ -93,7 +95,7 @@ export default function ReposPage() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          <span className="ml-3 text-gray-400">불러오는 중...</span>
+          <span className="ml-3 text-gray-400">{t('common.loading')}</span>
         </div>
       )}
 
@@ -149,7 +151,7 @@ export default function ReposPage() {
                 </svg>
               </div>
               <h3 className="text-white font-medium mb-2">
-                연동된 저장소가 없습니다
+                {t('repos.noRepos')}
               </h3>
               <p className="text-gray-500 text-sm mb-6 max-w-sm">
                 GitHub App을 설치하여 저장소를 연동하면 자동으로 보안 스캔이

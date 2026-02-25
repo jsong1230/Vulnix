@@ -17,6 +17,9 @@
     "dashboard": "Dashboard",
     "repos": "Repositories",
     "vulnerabilities": "Vulnerabilities",
+    "notifications": "Notifications",
+    "reports": "CISO Reports",
+    "falsePositives": "False Positives",
     "settings": "Settings",
     "login": "Login",
     "logout": "Logout"
@@ -29,7 +32,13 @@
     "recentScans": "Recent Scans",
     "recentVulnerabilities": "Recent Vulnerabilities",
     "noScans": "No scan history",
-    "noVulnerabilities": "No vulnerabilities found"
+    "noVulnerabilities": "No vulnerabilities found",
+    "trend": "Vulnerability Trend",
+    "repoScores": "Security Score by Repository",
+    "severityDist": "Severity Distribution",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "score": "Score"
   },
   "repos": {
     "title": "Repositories",
@@ -51,6 +60,8 @@
     },
     "status": {
       "open": "Open",
+      "patched": "Patched",
+      "ignored": "Ignored",
       "fixed": "Fixed",
       "false_positive": "False Positive",
       "accepted_risk": "Accepted Risk"
@@ -65,7 +76,8 @@
   "scan": {
     "status": {
       "pending": "Pending",
-      "running": "Running",
+      "queued": "Queued",
+      "running": "Scanning",
       "completed": "Completed",
       "failed": "Failed"
     },
@@ -79,5 +91,45 @@
     "subtitle": "Sign in with GitHub to strengthen your repository security",
     "loginWithGitHub": "Login with GitHub",
     "description": "AI-powered security vulnerability detection & auto-patch"
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "addSlack": "Add Slack",
+    "addTeams": "Add Teams",
+    "webhookUrl": "Webhook URL",
+    "severityThreshold": "Alert Severity",
+    "weeklyReport": "Weekly Report",
+    "testSend": "Send Test",
+    "deleteConfirm": "Are you sure you want to delete this notification setting?",
+    "noConfigs": "No notification settings registered"
+  },
+  "reports": {
+    "title": "CISO Reports",
+    "generate": "Generate Report",
+    "type": "Report Type",
+    "period": "Period",
+    "download": "Download",
+    "generating": "Generating...",
+    "noReports": "No reports generated"
+  },
+  "settings": {
+    "title": "Settings",
+    "apiKeys": "API Key Management",
+    "team": "Team Settings",
+    "newKey": "New Key",
+    "keyName": "Key Name",
+    "expiresIn": "Expires In",
+    "revoke": "Revoke",
+    "copyKey": "Copy",
+    "keyCopied": "Copied!",
+    "noKeys": "No API keys issued"
+  },
+  "falsePositives": {
+    "title": "False Positive Management",
+    "addPattern": "Add Pattern",
+    "ruleId": "Rule ID",
+    "filePattern": "File Pattern",
+    "reason": "Reason",
+    "noPatterns": "No false positive patterns registered"
   }
 }

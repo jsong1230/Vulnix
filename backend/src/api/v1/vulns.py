@@ -9,7 +9,8 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy import select as sa_select  # COUNT 서브쿼리 전용
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.api.deps import CurrentUser, DbSession
+from src.api.deps import CurrentLocale, CurrentUser, DbSession
+from src.i18n import get_message
 from src.models.false_positive import FalsePositivePattern
 from src.models.repository import Repository
 from src.models.team import TeamMember
@@ -311,6 +312,7 @@ async def get_vulnerability(
     vuln_id: uuid.UUID,
     current_user: CurrentUser,
     db: DbSession,
+    locale: CurrentLocale,
 ) -> ApiResponse[VulnerabilityResponse]:
     """취약점 상세 조회 (설계서 4-3절).
 
@@ -322,7 +324,7 @@ async def get_vulnerability(
     if vuln is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"취약점을 찾을 수 없습니다: {vuln_id}",
+            detail=get_message("vuln_not_found", locale),
         )
 
     # 저장소 접근 권한 확인
@@ -357,6 +359,7 @@ async def update_vulnerability_status(
     request: VulnerabilityStatusUpdateRequest,
     current_user: CurrentUser,
     db: DbSession,
+    locale: CurrentLocale,
 ) -> ApiResponse[VulnerabilityResponse]:
     """취약점 상태 변경 (설계서 4-4절).
 
@@ -369,7 +372,7 @@ async def update_vulnerability_status(
     if vuln is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"취약점을 찾을 수 없습니다: {vuln_id}",
+            detail=get_message("vuln_not_found", locale),
         )
 
     # 저장소 접근 권한 확인

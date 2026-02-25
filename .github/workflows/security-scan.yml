@@ -1,0 +1,36 @@
+name: Security Scan
+
+on:
+  schedule:
+    - cron: "0 2 * * 1" # 매주 월요일 오전 2시 (UTC)
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Semgrep SAST 스캔
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Semgrep 스캔 실행
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/python
+            p/security-audit
+            p/owasp-top-ten
+          generateSarif: "1"
+          auditOn: push
+
+      - name: SARIF 결과를 GitHub Security 탭에 업로드
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep

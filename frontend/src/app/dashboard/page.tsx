@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { SummaryCard } from '@/components/dashboard/summary-card';
 import { RecentVulnerabilities } from '@/components/dashboard/recent-vulnerabilities';
 import { RecentScans } from '@/components/dashboard/recent-scans';
@@ -12,6 +13,7 @@ import { useVulnerabilityList } from '@/lib/hooks/use-vulnerabilities';
  * React Query를 통해 /api/v1/dashboard/summary, /api/v1/vulnerabilities 연동
  */
 export default function DashboardPage() {
+  const t = useTranslations();
   const {
     data: summary,
     isLoading: summaryLoading,
@@ -33,7 +35,7 @@ export default function DashboardPage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">대시보드</h1>
+        <h1 className="text-2xl font-bold text-white">{t('nav.dashboard')}</h1>
         <p className="text-gray-400 mt-1 text-sm">
           연동된 모든 저장소의 보안 취약점 현황
         </p>
@@ -67,25 +69,25 @@ export default function DashboardPage() {
         ) : (
           <>
             <SummaryCard
-              title="전체 취약점"
+              title={t('dashboard.totalVulnerabilities')}
               value={summary?.totalVulnerabilities ?? 0}
               description="탐지된 총 취약점 수"
               variant="default"
             />
             <SummaryCard
-              title="미해결 취약점"
+              title={t('dashboard.openVulnerabilities')}
               value={summary?.statusDistribution.open ?? 0}
               description="아직 패치되지 않은 항목"
               variant="danger"
             />
             <SummaryCard
-              title="해결률"
+              title={t('dashboard.securityScore')}
               value={`${Math.round(summary?.resolutionRate ?? 0)}%`}
               description="패치 완료 / 전체"
               variant="safe"
             />
             <SummaryCard
-              title="연동 저장소"
+              title={t('repos.title')}
               value={summary?.repoCount ?? 0}
               description="스캔 활성화된 저장소"
               variant="default"
@@ -99,7 +101,7 @@ export default function DashboardPage() {
         {/* 최근 취약점 목록 */}
         <div className="card p-6">
           <h2 className="text-base font-semibold text-white mb-4">
-            최근 탐지된 취약점
+            {t('dashboard.recentVulnerabilities')}
           </h2>
           {vulnsLoading ? (
             /* 취약점 목록 로딩 스켈레톤 */
@@ -122,7 +124,7 @@ export default function DashboardPage() {
         {/* 최근 스캔 히스토리 */}
         <div className="card p-6">
           <h2 className="text-base font-semibold text-white mb-4">
-            최근 스캔 기록
+            {t('dashboard.recentScans')}
           </h2>
           {summaryLoading ? (
             /* 스캔 목록 로딩 스켈레톤 */

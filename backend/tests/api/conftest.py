@@ -19,12 +19,22 @@ def _inject_redis_mock() -> None:
 
     scan_orchestrator.py가 `import redis`와 `from rq import ...`를
     사용하므로, 해당 모듈이 설치되지 않아도 임포트가 가능해야 한다.
+    rate_limit.py가 `import redis.asyncio as aioredis`를 사용하므로
+    redis.asyncio 서브모듈도 Mock으로 등록한다.
     """
     if "redis" not in sys.modules:
         redis_mock = MagicMock()
         redis_mock.Redis = MagicMock()
         redis_mock.from_url = MagicMock(return_value=MagicMock())
         sys.modules["redis"] = redis_mock
+
+    # redis.asyncio 서브모듈 Mock 등록 (rate_limit_middleware, health.py 대응)
+    if "redis.asyncio" not in sys.modules:
+        asyncio_mock = MagicMock()
+        asyncio_mock.from_url = MagicMock(return_value=MagicMock())
+        sys.modules["redis.asyncio"] = asyncio_mock
+        # redis 패키지 속성으로도 등록
+        sys.modules["redis"].asyncio = asyncio_mock
 
     if "rq" not in sys.modules:
         rq_mock = MagicMock()
