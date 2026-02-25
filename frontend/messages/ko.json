@@ -17,6 +17,7 @@
     "dashboard": "대시보드",
     "repos": "저장소",
     "vulnerabilities": "취약점",
+    "scans": "스캔",
     "notifications": "알림 설정",
     "reports": "CISO 리포트",
     "falsePositives": "오탐 관리",

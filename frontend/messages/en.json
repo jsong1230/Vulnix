@@ -17,6 +17,7 @@
     "dashboard": "Dashboard",
     "repos": "Repositories",
     "vulnerabilities": "Vulnerabilities",
+    "scans": "Scans",
     "notifications": "Notifications",
     "reports": "CISO Reports",
     "falsePositives": "False Positives",

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { NavLink } from './nav-link';
 
 /**
  * 사이드 내비게이션 컴포넌트
@@ -37,6 +38,23 @@ const ReposIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+    />
+  </svg>
+);
+
+// 스캔 아이콘
+const ScansIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"
     />
   </svg>
 );
@@ -146,6 +164,11 @@ export async function Sidebar() {
       icon: <ReposIcon />,
     },
     {
+      href: '/scans',
+      label: t('scans'),
+      icon: <ScansIcon />,
+    },
+    {
       href: '/vulnerabilities',
       label: t('vulnerabilities'),
       icon: <VulnerabilitiesIcon />,
@@ -180,15 +203,7 @@ export async function Sidebar() {
       {/* 내비게이션 메뉴 */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors text-sm"
-            // TODO: usePathname()으로 현재 경로 감지 후 활성 스타일 적용
-          >
-            {item.icon}
-            {item.label}
-          </Link>
+          <NavLink key={item.href} href={item.href} label={item.label} icon={item.icon} />
         ))}
       </nav>
 
