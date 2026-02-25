@@ -1,0 +1,17 @@
+rules:
+  - id: vulnix.java.injection.sql_string_concat
+    pattern-either:
+      - pattern: $STMT.executeQuery($QUERY + ...)
+      - pattern: $STMT.executeUpdate($QUERY + ...)
+      - patterns:
+          - pattern: |
+              String $QUERY = $PREFIX + $INPUT;
+              ...
+              $STMT.executeQuery($QUERY);
+    message: "SQL Injection: 문자열 연결로 SQL 쿼리를 조합합니다. PreparedStatement를 사용하세요."
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-89
+      owasp: A03:2021 - Injection
+      category: injection

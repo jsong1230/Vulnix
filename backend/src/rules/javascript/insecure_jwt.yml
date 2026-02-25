@@ -1,0 +1,12 @@
+rules:
+  - id: vulnix.javascript.auth.jwt_no_verify
+    pattern-either:
+      - pattern: jwt.decode($TOKEN)
+      - pattern: jwt.sign($PAYLOAD, $SECRET, {algorithm: "none"})
+    message: "JWT 서명 미검증: jwt.verify() 대신 jwt.decode()를 사용하면 서명 검증 없이 페이로드를 읽습니다."
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: CWE-347
+      owasp: A07:2021 - Identification and Authentication Failures
+      category: insecure_jwt

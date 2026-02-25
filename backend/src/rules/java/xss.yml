@@ -1,0 +1,12 @@
+rules:
+  - id: vulnix.java.xss.servlet_print_unsanitized
+    pattern-either:
+      - pattern: $RESPONSE.getWriter().print($INPUT)
+      - pattern: $RESPONSE.getWriter().println($INPUT)
+    message: "XSS: 서블릿 응답에 사용자 입력을 이스케이프 없이 출력합니다."
+    languages: [java]
+    severity: ERROR
+    metadata:
+      cwe: CWE-79
+      owasp: A03:2021 - Injection
+      category: xss

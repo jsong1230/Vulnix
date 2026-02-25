@@ -1,0 +1,14 @@
+rules:
+  - id: vulnix.javascript.injection.sql_string_concat
+    pattern-either:
+      - pattern: $DB.query($QUERY + ...)
+      - pattern: $DB.query(`...${...}...`)
+      - pattern: $CONN.query($QUERY + ...)
+      - pattern: sequelize.query(`...${...}...`)
+    message: "SQL Injection: 문자열 연결을 통한 SQL 쿼리 조합은 SQL Injection에 취약합니다."
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: CWE-89
+      owasp: A03:2021 - Injection
+      category: injection

@@ -1,0 +1,78 @@
+rules:
+  # ---------------------------------------------------------------
+  # CWE-89: SQL Injection (Python)
+  # 사용자 입력을 직접 SQL 쿼리에 삽입하는 패턴을 탐지한다.
+  # ---------------------------------------------------------------
+
+  - id: vulnix.python.sql_injection.string_format
+    languages: [python]
+    severity: ERROR
+    message: |
+      SQL Injection 취약점 탐지: 사용자 입력을 문자열 포맷팅으로 SQL에 직접 삽입하고 있습니다.
+      파라미터화된 쿼리(parameterized query)를 사용하세요.
+    metadata:
+      cwe: ["CWE-89"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: HIGH
+      category: security
+      technology: [python, sql]
+    patterns:
+      - pattern: |
+          $CURSOR.execute("..." % $INPUT)
+      - pattern: |
+          $CURSOR.execute("..." .format(...))
+      - pattern: |
+          $CURSOR.execute(f"...{$INPUT}...")
+    fix-regex:
+      regex: 'execute\(f"([^"]*)\{(\w+)\}([^"]*)"\)'
+      replacement: 'execute("\1%s\3", (\2,))'
+
+  - id: vulnix.python.sql_injection.string_concat
+    languages: [python]
+    severity: ERROR
+    message: |
+      SQL Injection 취약점 탐지: 문자열 연결(+)로 SQL 쿼리를 동적 생성하고 있습니다.
+      파라미터화된 쿼리를 사용하세요.
+    metadata:
+      cwe: ["CWE-89"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: MEDIUM
+      category: security
+    pattern: |
+      $CURSOR.execute($QUERY + $INPUT)
+
+  - id: vulnix.python.sql_injection.sqlalchemy_text
+    languages: [python]
+    severity: ERROR
+    message: |
+      SQL Injection 취약점 탐지: SQLAlchemy text()에 사용자 입력을 직접 삽입하고 있습니다.
+      bindparams()를 사용하세요.
+    metadata:
+      cwe: ["CWE-89"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: HIGH
+      category: security
+      technology: [python, sqlalchemy]
+    pattern: |
+      sqlalchemy.text(f"...{$USER_INPUT}...")
+
+  - id: python-django-raw-sql
+    languages: [python]
+    severity: ERROR
+    message: Django raw() SQL 쿼리에 사용자 입력 삽입 가능성. 파라미터화 쿼리 사용 권장.
+    metadata:
+      cwe: ["CWE-89"]
+      owasp: ["A03:2021 - Injection"]
+    patterns:
+      - pattern: $MODEL.objects.raw($QUERY, ...)
+      - pattern-not: $MODEL.objects.raw("...", ...)
+
+  - id: python-django-extra-sql
+    languages: [python]
+    severity: ERROR
+    message: Django extra() where 절에 사용자 입력 삽입 가능성.
+    metadata:
+      cwe: ["CWE-89"]
+      owasp: ["A03:2021 - Injection"]
+    patterns:
+      - pattern: $QUERYSET.extra(where=[$EXPR], ...)

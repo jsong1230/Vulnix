@@ -1,0 +1,15 @@
+rules:
+  - id: vulnix.java.crypto.hardcoded_key
+    pattern-either:
+      - pattern: new SecretKeySpec("...".getBytes(), ...)
+      - patterns:
+          - pattern: |
+              String $KEY = "...";
+              new SecretKeySpec($KEY.getBytes(), ...)
+    message: "하드코딩된 암호화 키."
+    languages: [java]
+    severity: WARNING
+    metadata:
+      cwe: CWE-798
+      owasp: A02:2021 - Cryptographic Failures
+      category: hardcoded_credentials

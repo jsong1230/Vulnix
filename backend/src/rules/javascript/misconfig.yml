@@ -1,0 +1,12 @@
+rules:
+  - id: vulnix.javascript.misconfig.cors_wildcard
+    pattern-either:
+      - pattern: $RES.header("Access-Control-Allow-Origin", "*")
+      - pattern: cors({origin: "*"})
+    message: "CORS 과도 허용: Access-Control-Allow-Origin을 '*'로 설정하면 모든 도메인에서 접근 가능합니다."
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: CWE-942
+      owasp: A05:2021 - Security Misconfiguration
+      category: misconfig

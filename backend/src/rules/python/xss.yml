@@ -1,0 +1,79 @@
+rules:
+  # ---------------------------------------------------------------
+  # CWE-79: Cross-Site Scripting (XSS) (Python)
+  # 사용자 입력을 이스케이프 없이 HTML 응답에 출력하는 패턴을 탐지한다.
+  # ---------------------------------------------------------------
+
+  - id: vulnix.python.xss.flask_render_html
+    languages: [python]
+    severity: ERROR
+    message: |
+      XSS 취약점 탐지: 사용자 입력을 이스케이프 없이 Flask 응답에 직접 포함하고 있습니다.
+      flask.escape() 또는 Jinja2 자동 이스케이프를 사용하세요.
+    metadata:
+      cwe: ["CWE-79"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: HIGH
+      category: security
+      technology: [python, flask]
+    patterns:
+      - pattern: |
+          flask.make_response($USER_INPUT)
+      - pattern: |
+          flask.Response($USER_INPUT, mimetype="text/html")
+
+  - id: vulnix.python.xss.flask_markup_unsafe
+    languages: [python]
+    severity: ERROR
+    message: |
+      XSS 취약점 탐지: Markup()으로 사용자 입력을 안전하지 않은 HTML로 마킹하고 있습니다.
+      사용자 입력에는 Markup()을 사용하지 마세요.
+    metadata:
+      cwe: ["CWE-79"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: HIGH
+      category: security
+      technology: [python, flask, jinja2]
+    pattern: |
+      markupsafe.Markup($USER_INPUT)
+
+  - id: vulnix.python.xss.jinja2_autoescape_disabled
+    languages: [python]
+    severity: WARNING
+    message: |
+      XSS 위험 설정: Jinja2 autoescape가 비활성화되어 있습니다.
+      autoescape=True 또는 select_autoescape()를 사용하세요.
+    metadata:
+      cwe: ["CWE-79"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: MEDIUM
+      category: security
+      technology: [python, jinja2]
+    pattern: |
+      jinja2.Environment(autoescape=False, ...)
+
+  - id: vulnix.python.xss.django_mark_safe
+    languages: [python]
+    severity: ERROR
+    message: |
+      XSS 취약점 탐지: django.utils.safestring.mark_safe()에 사용자 입력을 전달하고 있습니다.
+      사용자 입력에는 mark_safe()를 절대 사용하지 마세요.
+    metadata:
+      cwe: ["CWE-79"]
+      owasp: ["A03:2021 - Injection"]
+      confidence: HIGH
+      category: security
+      technology: [python, django]
+    pattern: |
+      django.utils.safestring.mark_safe($USER_INPUT)
+
+  - id: python-fastapi-html-response-xss
+    languages: [python]
+    severity: ERROR
+    message: FastAPI HTMLResponse에 사용자 입력 직접 삽입. html.escape() 처리 필요.
+    metadata:
+      cwe: ["CWE-79"]
+      owasp: ["A03:2021 - Injection"]
+    patterns:
+      - pattern: HTMLResponse(content=... + $USER_INPUT + ...)
+      - pattern: HTMLResponse(content=f"...{$USER_INPUT}...")

@@ -1,0 +1,19 @@
+rules:
+  - id: vulnix.javascript.xss.innerhtml_assignment
+    pattern: $EL.innerHTML = $DATA
+    message: "XSS: innerHTML에 사용자 입력을 직접 할당하면 XSS에 취약합니다."
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: CWE-79
+      owasp: A03:2021 - Injection
+      category: xss
+  - id: vulnix.javascript.xss.document_write
+    pattern: document.write($DATA)
+    message: "XSS: document.write()에 사용자 입력 사용 금지."
+    languages: [javascript, typescript]
+    severity: ERROR
+    metadata:
+      cwe: CWE-79
+      owasp: A03:2021 - Injection
+      category: xss

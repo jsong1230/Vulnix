@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables (secrets)
+.env
+.env.*
+!.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Worktrees (git worktree directories)
+.worktrees/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+
+# mypy / type checkers
+.mypy_cache/
+.dmypy.json
+.ruff_cache/
+.pytype/
+
+# Logs
+*.log
+logs/
+
+# Node (frontend)
+node_modules/
+.next/
+out/
+.nuxt/
+
+# Temporary files
+*.tmp
+*.bak
+tmp/
+temp/

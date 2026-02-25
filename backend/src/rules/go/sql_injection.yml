@@ -1,0 +1,13 @@
+rules:
+  - id: vulnix.go.injection.sql_string_format
+    pattern-either:
+      - pattern: $DB.Query(fmt.Sprintf($FMT, ...))
+      - pattern: $DB.QueryRow(fmt.Sprintf($FMT, ...))
+      - pattern: $DB.Exec(fmt.Sprintf($FMT, ...))
+    message: "SQL Injection: fmt.Sprintf로 조합한 쿼리는 SQL Injection에 취약합니다."
+    languages: [go]
+    severity: ERROR
+    metadata:
+      cwe: CWE-89
+      owasp: A03:2021 - Injection
+      category: injection

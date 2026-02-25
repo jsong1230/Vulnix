@@ -1,0 +1,12 @@
+rules:
+  - id: vulnix.go.injection.command_exec
+    pattern-either:
+      - pattern: exec.Command($CMD, $INPUT)
+      - pattern: exec.CommandContext($CTX, $CMD, $INPUT)
+    message: "Command Injection: 사용자 입력을 쉘 명령어에 직접 사용합니다."
+    languages: [go]
+    severity: ERROR
+    metadata:
+      cwe: CWE-78
+      owasp: A03:2021 - Injection
+      category: command_injection

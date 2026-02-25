@@ -1,0 +1,23 @@
+rules:
+  - id: vulnix.java.crypto.weak_hash
+    pattern-either:
+      - pattern: MessageDigest.getInstance("MD5")
+      - pattern: MessageDigest.getInstance("SHA-1")
+    message: "약한 해시 알고리즘: MD5/SHA-1 대신 SHA-256 이상을 사용하세요."
+    languages: [java]
+    severity: WARNING
+    metadata:
+      cwe: CWE-327
+      owasp: A02:2021 - Cryptographic Failures
+      category: weak_crypto
+  - id: vulnix.java.crypto.insecure_random
+    pattern-either:
+      - pattern: new Random()
+      - pattern: Math.random()
+    message: "안전하지 않은 난수 생성기. SecureRandom을 사용하세요."
+    languages: [java]
+    severity: WARNING
+    metadata:
+      cwe: CWE-330
+      owasp: A02:2021 - Cryptographic Failures
+      category: weak_crypto

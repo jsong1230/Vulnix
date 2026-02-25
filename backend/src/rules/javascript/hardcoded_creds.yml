@@ -1,0 +1,15 @@
+rules:
+  - id: vulnix.javascript.crypto.hardcoded_key
+    pattern-either:
+      - patterns:
+          - pattern: |
+              const $KEY = "..."
+              jwt.sign($PAYLOAD, $KEY, ...)
+      - pattern: process.env.$VAR || "..."
+    message: "하드코딩된 시크릿 키가 감지되었습니다."
+    languages: [javascript, typescript]
+    severity: WARNING
+    metadata:
+      cwe: CWE-798
+      owasp: A02:2021 - Cryptographic Failures
+      category: hardcoded_credentials

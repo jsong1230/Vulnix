@@ -1,0 +1,12 @@
+rules:
+  - id: vulnix.go.crypto.weak_hash_md5
+    pattern-either:
+      - pattern: md5.New()
+      - pattern: md5.Sum($DATA)
+    message: "약한 해시 알고리즘: MD5 대신 sha256을 사용하세요."
+    languages: [go]
+    severity: WARNING
+    metadata:
+      cwe: CWE-327
+      owasp: A02:2021 - Cryptographic Failures
+      category: weak_crypto
