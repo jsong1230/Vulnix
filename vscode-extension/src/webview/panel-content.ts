@@ -2,9 +2,11 @@
  * 웹뷰 패널 HTML 생성기
  * - Finding 상세 정보를 HTML로 렌더링
  * - XSS 방지를 위한 HTML 이스케이프 처리
+ * - i18n: t()를 통해 현재 로케일의 레이블 사용
  */
 
 import type { Finding } from '../api/types';
+import { t } from '../i18n';
 
 /**
  * HTML 특수 문자 이스케이프 (XSS 방지)
@@ -40,17 +42,18 @@ function getSeverityColor(severity: Finding['severity']): string {
  * @returns HTML 문자열
  */
 export function generateDetailHtml(finding: Finding, patchDiff?: string): string {
+  const msg = t();
   const severityColor = getSeverityColor(finding.severity);
   const cweSection = finding.cwe_id
-    ? `<p><strong>CWE:</strong> <a href="https://cwe.mitre.org/data/definitions/${escapeHtml(finding.cwe_id.replace('CWE-', ''))}.html">${escapeHtml(finding.cwe_id)}</a></p>`
+    ? `<p><strong>${escapeHtml(msg.detailCwe)}:</strong> <a href="https://cwe.mitre.org/data/definitions/${escapeHtml(finding.cwe_id.replace('CWE-', ''))}.html">${escapeHtml(finding.cwe_id)}</a></p>`
     : '';
 
   const owaspSection = finding.owasp_category
-    ? `<p><strong>OWASP:</strong> ${escapeHtml(finding.owasp_category)}</p>`
+    ? `<p><strong>${escapeHtml(msg.detailOwasp)}:</strong> ${escapeHtml(finding.owasp_category)}</p>`
     : '';
 
   const patchSection = patchDiff
-    ? `<h3>Patch Suggestion</h3><pre><code>${escapeHtml(patchDiff)}</code></pre>`
+    ? `<h3>${escapeHtml(msg.detailPatch)}</h3><pre><code>${escapeHtml(patchDiff)}</code></pre>`
     : '';
 
   return `<!DOCTYPE html>
@@ -59,7 +62,7 @@ export function generateDetailHtml(finding: Finding, patchDiff?: string): string
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';">
-  <title>Vulnix - Vulnerability Detail</title>
+  <title>Vulnix - ${escapeHtml(msg.detailTitle)}</title>
   <style>
     body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); padding: 16px; }
     .severity-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; color: white; font-weight: bold; background-color: ${severityColor}; }
@@ -84,13 +87,13 @@ export function generateDetailHtml(finding: Finding, patchDiff?: string): string
   <h2>${escapeHtml(finding.rule_id)}</h2>
   <p><span class="severity-badge">${escapeHtml(finding.severity.toUpperCase())}</span></p>
   <p>${escapeHtml(finding.message)}</p>
-  <p><strong>File:</strong> ${escapeHtml(finding.file_path)} (line ${finding.start_line})</p>
+  <p><strong>${escapeHtml(msg.detailLocation)}:</strong> ${escapeHtml(finding.file_path)} (line ${finding.start_line})</p>
   ${cweSection}
   ${owaspSection}
   <h3>Code Snippet</h3>
   <pre><code>${escapeHtml(finding.code_snippet)}</code></pre>
   ${patchSection}
-  <button class="apply-patch-btn" onclick="applyPatch()">Apply Patch</button>
+  <button class="apply-patch-btn" onclick="applyPatch()">${escapeHtml(msg.applyPatchButton)}</button>
   <script>
     const vscode = acquireVsCodeApi();
     function applyPatch() {

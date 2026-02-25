@@ -1,0 +1,83 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "search": "Search"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "repos": "Repositories",
+    "vulnerabilities": "Vulnerabilities",
+    "settings": "Settings",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Security Dashboard",
+    "securityScore": "Security Score",
+    "totalVulnerabilities": "Total Vulnerabilities",
+    "openVulnerabilities": "Open Vulnerabilities",
+    "recentScans": "Recent Scans",
+    "recentVulnerabilities": "Recent Vulnerabilities",
+    "noScans": "No scan history",
+    "noVulnerabilities": "No vulnerabilities found"
+  },
+  "repos": {
+    "title": "Repositories",
+    "addRepo": "Add Repository",
+    "noRepos": "No repositories connected",
+    "scanNow": "Scan Now",
+    "lastScanned": "Last Scanned",
+    "scanning": "Scanning...",
+    "vulnerabilities": "Vulnerabilities"
+  },
+  "vulnerability": {
+    "title": "Vulnerability",
+    "severity": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "informational": "Informational"
+    },
+    "status": {
+      "open": "Open",
+      "fixed": "Fixed",
+      "false_positive": "False Positive",
+      "accepted_risk": "Accepted Risk"
+    },
+    "markFalsePositive": "Mark as False Positive",
+    "acceptRisk": "Accept Risk",
+    "viewPatch": "View Patch",
+    "codeLocation": "Code Location",
+    "description": "Description",
+    "recommendation": "Recommendation"
+  },
+  "scan": {
+    "status": {
+      "pending": "Pending",
+      "running": "Running",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "startedAt": "Started At",
+    "completedAt": "Completed At",
+    "duration": "Duration",
+    "foundVulnerabilities": "Vulnerabilities Found"
+  },
+  "login": {
+    "title": "Welcome to Vulnix",
+    "subtitle": "Sign in with GitHub to strengthen your repository security",
+    "loginWithGitHub": "Login with GitHub",
+    "description": "AI-powered security vulnerability detection & auto-patch"
+  }
+}

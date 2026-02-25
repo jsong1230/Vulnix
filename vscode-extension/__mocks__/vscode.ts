@@ -219,3 +219,7 @@ export enum StatusBarAlignment {
   Left = 1,
   Right = 2,
 }
+
+export const env = {
+  language: 'ko',
+};

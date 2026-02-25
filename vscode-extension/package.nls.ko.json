@@ -1,0 +1,13 @@
+{
+  "extension.displayName": "Vulnix 보안 스캐너",
+  "extension.description": "코드 작성 중 실시간 보안 취약점 탐지 및 자동 수정",
+  "config.serverUrl.description": "Vulnix 서버 URL",
+  "config.apiKey.description": "팀 API Key (vx_live_... 형식)",
+  "config.analyzeOnSave.description": "파일 저장 시 자동 분석",
+  "config.severityFilter.description": "표시할 최소 심각도",
+  "command.analyzeFile": "Vulnix: 현재 파일 분석",
+  "command.applyPatch": "Vulnix: 패치 자동 적용",
+  "command.showDetail": "Vulnix: 취약점 상세 보기",
+  "command.syncFPPatterns": "Vulnix: 오탐 패턴 동기화",
+  "command.clearDiagnostics": "Vulnix: 진단 전체 초기화"
+}

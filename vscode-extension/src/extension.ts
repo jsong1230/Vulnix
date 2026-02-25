@@ -14,6 +14,7 @@ import { StatusBarManager } from './status/status-bar';
 import { WebviewManager } from './webview/webview';
 import { VulnixCodeActionProvider } from './code-actions/code-actions';
 import { applyPatch } from './code-actions/patch-applier';
+import { t } from './i18n';
 
 let diagnosticsManager: DiagnosticsManager | null = null;
 let statusBar: StatusBarManager | null = null;
@@ -107,7 +108,7 @@ export function activate(context: vscode.ExtensionContext): void {
         await vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
-            title: 'Vulnix: 패치 제안을 생성하는 중...',
+            title: `Vulnix: ${t().patchGenerating}`,
             cancellable: false,
           },
           async () => {
@@ -127,7 +128,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
               const patchDiff = patchResponse.data?.patch_diff;
               if (!patchDiff) {
-                void vscode.window.showErrorMessage('Vulnix: 패치 제안을 받지 못했습니다.');
+                void vscode.window.showErrorMessage(`Vulnix: ${t().patchFailed}`);
                 return;
               }
 
@@ -135,13 +136,13 @@ export function activate(context: vscode.ExtensionContext): void {
               const success = await applyPatch(document, patchDiff);
               if (success) {
                 void vscode.window.showInformationMessage(
-                  `Vulnix: 패치가 성공적으로 적용되었습니다. (${ruleId})`
+                  `Vulnix: ${t().patchApplied} (${ruleId})`
                 );
               } else {
-                void vscode.window.showErrorMessage('Vulnix: 패치 적용에 실패했습니다.');
+                void vscode.window.showErrorMessage(`Vulnix: ${t().patchFailed}`);
               }
             } catch {
-              void vscode.window.showErrorMessage('Vulnix: 패치 제안 요청 중 오류가 발생했습니다.');
+              void vscode.window.showErrorMessage(`Vulnix: ${t().serverError}`);
             }
           }
         );
@@ -180,6 +181,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('vulnix.clearDiagnostics', () => {
       diagnosticsManager?.clearAll();
       statusBar?.setConnected(0);
+      void vscode.window.showInformationMessage(`Vulnix: ${t().diagnosticsCleared}`);
     })
   );
 
@@ -225,7 +227,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // 설정 완료 여부 확인
   if (!config.isConfigured()) {
     void vscode.window.showWarningMessage(
-      'Vulnix: API 키가 설정되지 않았습니다. 설정에서 vulnix.apiKey를 입력해주세요.',
+      `Vulnix: ${t().notConfigured}`,
       '설정 열기'
     ).then(selection => {
       if (selection === '설정 열기') {

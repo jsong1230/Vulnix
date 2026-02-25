@@ -1,0 +1,13 @@
+{
+  "extension.displayName": "Vulnix Security Scanner",
+  "extension.description": "Real-time security vulnerability detection and auto-fix for your code",
+  "config.serverUrl.description": "Vulnix server URL",
+  "config.apiKey.description": "Team API Key (vx_live_... format)",
+  "config.analyzeOnSave.description": "Analyze file on save",
+  "config.severityFilter.description": "Minimum severity to display",
+  "command.analyzeFile": "Vulnix: Analyze Current File",
+  "command.applyPatch": "Vulnix: Apply Patch Fix",
+  "command.showDetail": "Vulnix: Show Vulnerability Detail",
+  "command.syncFPPatterns": "Vulnix: Sync False Positive Patterns",
+  "command.clearDiagnostics": "Vulnix: Clear All Diagnostics"
+}

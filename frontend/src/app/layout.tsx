@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { getLocale } from 'next-intl/server';
 import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -17,9 +18,12 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  // 쿠키 기반 로케일 읽기 (i18n/request.ts 설정 따름)
+  const locale = await getLocale();
+
   return (
-    <html lang="ko" className="h-full">
+    <html lang={locale} className="h-full">
       <body className={`${inter.className} h-full`}>
         {/* 전체 레이아웃: 사이드바 + 메인 영역 */}
         <div className="flex h-full">

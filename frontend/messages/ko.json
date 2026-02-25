@@ -1,0 +1,83 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "confirm": "확인",
+    "search": "검색"
+  },
+  "nav": {
+    "dashboard": "대시보드",
+    "repos": "저장소",
+    "vulnerabilities": "취약점",
+    "settings": "설정",
+    "login": "로그인",
+    "logout": "로그아웃"
+  },
+  "dashboard": {
+    "title": "보안 대시보드",
+    "securityScore": "보안 점수",
+    "totalVulnerabilities": "전체 취약점",
+    "openVulnerabilities": "미해결 취약점",
+    "recentScans": "최근 스캔",
+    "recentVulnerabilities": "최근 취약점",
+    "noScans": "스캔 기록이 없습니다",
+    "noVulnerabilities": "취약점이 없습니다"
+  },
+  "repos": {
+    "title": "저장소",
+    "addRepo": "저장소 추가",
+    "noRepos": "연동된 저장소가 없습니다",
+    "scanNow": "지금 스캔",
+    "lastScanned": "마지막 스캔",
+    "scanning": "스캔 중...",
+    "vulnerabilities": "취약점"
+  },
+  "vulnerability": {
+    "title": "취약점",
+    "severity": {
+      "critical": "심각",
+      "high": "높음",
+      "medium": "중간",
+      "low": "낮음",
+      "informational": "정보"
+    },
+    "status": {
+      "open": "미해결",
+      "fixed": "수정됨",
+      "false_positive": "오탐",
+      "accepted_risk": "위험 수용"
+    },
+    "markFalsePositive": "오탐으로 표시",
+    "acceptRisk": "위험 수용",
+    "viewPatch": "패치 보기",
+    "codeLocation": "코드 위치",
+    "description": "설명",
+    "recommendation": "권고사항"
+  },
+  "scan": {
+    "status": {
+      "pending": "대기 중",
+      "running": "실행 중",
+      "completed": "완료",
+      "failed": "실패"
+    },
+    "startedAt": "시작 시간",
+    "completedAt": "완료 시간",
+    "duration": "소요 시간",
+    "foundVulnerabilities": "발견된 취약점"
+  },
+  "login": {
+    "title": "Vulnix에 오신 것을 환영합니다",
+    "subtitle": "GitHub 계정으로 로그인하여 저장소의 보안을 강화하세요",
+    "loginWithGitHub": "GitHub으로 로그인",
+    "description": "AI 기반 보안 취약점 탐지 & 자동 패치"
+  }
+}

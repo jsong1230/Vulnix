@@ -1,9 +1,15 @@
+import { getLocale, getTranslations } from 'next-intl/server';
+import { LanguageSwitcher } from './language-switcher';
+
 /**
  * 상단 헤더 컴포넌트
- * 현재 페이지 컨텍스트 + 사용자 프로필 표시
+ * 현재 페이지 컨텍스트 + 사용자 프로필 표시 + 언어 전환
  * TODO: 사용자 인증 상태 연동 (GET /api/v1/auth/me)
  */
-export function Header() {
+export async function Header() {
+  const locale = await getLocale();
+  const t = await getTranslations('nav');
+
   // TODO: useQuery(() => apiClient.get('/api/v1/auth/me')) 로 교체
   const user = null as {
     githubLogin: string;
@@ -17,8 +23,11 @@ export function Header() {
         {/* TODO: 검색 기능 추가 */}
       </div>
 
-      {/* 오른쪽: 사용자 프로필 */}
-      <div className="flex items-center gap-3">
+      {/* 오른쪽: 언어 전환 + 사용자 프로필 */}
+      <div className="flex items-center gap-4">
+        {/* 언어 전환 버튼 */}
+        <LanguageSwitcher currentLocale={locale} />
+
         {user ? (
           /* 로그인된 사용자 */
           <div className="flex items-center gap-2">
@@ -44,7 +53,7 @@ export function Header() {
             href="/login"
             className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
           >
-            로그인
+            {t('login')}
           </a>
         )}
       </div>

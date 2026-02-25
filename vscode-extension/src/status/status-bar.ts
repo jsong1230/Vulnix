@@ -4,6 +4,7 @@
  */
 
 import * as vscode from 'vscode';
+import { t } from '../i18n';
 
 export class StatusBarManager {
   private readonly item: vscode.StatusBarItem;
@@ -17,21 +18,21 @@ export class StatusBarManager {
    * 연결됨 상태: 발견된 이슈 개수 표시
    */
   setConnected(issueCount: number): void {
-    this.item.text = `$(shield) Vulnix: ${issueCount} issue(s)`;
+    this.item.text = t().statusIssues(issueCount);
   }
 
   /**
    * 오프라인 상태 표시
    */
   setOffline(): void {
-    this.item.text = '$(shield) Vulnix: offline';
+    this.item.text = t().statusOffline;
   }
 
   /**
    * 분석 중 상태 표시
    */
   setAnalyzing(): void {
-    this.item.text = '$(loading~spin) Vulnix: analyzing...';
+    this.item.text = t().statusAnalyzing;
   }
 
   /**

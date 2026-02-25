@@ -1,11 +1,16 @@
 {
   "name": "vulnix-security",
-  "displayName": "Vulnix Security Scanner",
-  "description": "Real-time security vulnerability detection and auto-fix for your code",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
   "version": "0.1.0",
   "publisher": "vulnix",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Linters", "Other"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
   "activationEvents": [
     "onLanguage:python",
     "onLanguage:javascript",
@@ -21,46 +26,50 @@
         "vulnix.serverUrl": {
           "type": "string",
           "default": "https://api.vulnix.dev",
-          "description": "Vulnix 서버 URL"
+          "description": "%config.serverUrl.description%"
         },
         "vulnix.apiKey": {
           "type": "string",
           "default": "",
-          "description": "팀 API Key (vx_live_... 형식)"
+          "description": "%config.apiKey.description%"
         },
         "vulnix.analyzeOnSave": {
           "type": "boolean",
           "default": true,
-          "description": "파일 저장 시 자동 분석"
+          "description": "%config.analyzeOnSave.description%"
         },
         "vulnix.severityFilter": {
           "type": "string",
-          "enum": ["all", "high", "critical"],
+          "enum": [
+            "all",
+            "high",
+            "critical"
+          ],
           "default": "all",
-          "description": "표시할 최소 심각도"
+          "description": "%config.severityFilter.description%"
         }
       }
     },
     "commands": [
       {
         "command": "vulnix.analyzeFile",
-        "title": "Vulnix: Analyze Current File"
+        "title": "%command.analyzeFile%"
       },
       {
         "command": "vulnix.showDetail",
-        "title": "Vulnix: Show Vulnerability Detail"
+        "title": "%command.showDetail%"
       },
       {
         "command": "vulnix.syncFPPatterns",
-        "title": "Vulnix: Sync False Positive Patterns"
+        "title": "%command.syncFPPatterns%"
       },
       {
         "command": "vulnix.clearDiagnostics",
-        "title": "Vulnix: Clear All Diagnostics"
+        "title": "%command.clearDiagnostics%"
       },
       {
         "command": "vulnix.applyPatch",
-        "title": "Vulnix: Apply Patch Fix"
+        "title": "%command.applyPatch%"
       }
     ]
   },
@@ -83,6 +92,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@vscode/l10n": "^0.0.18",
     "minimatch": "^9.0.4"
   }
 }
