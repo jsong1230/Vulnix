@@ -286,6 +286,122 @@ npm test
 
 ---
 
+## 배포
+
+권장 스택: **Railway** (백엔드) + **Vercel** (프론트엔드) + **Supabase** (PostgreSQL) + **Upstash** (Redis)
+
+### 백엔드 — Railway
+
+**1. Docker 이미지 빌드**
+
+```bash
+cd backend
+docker build -t vulnix-backend .
+```
+
+**2. Railway 프로젝트 생성 및 배포**
+
+```bash
+# Railway CLI 설치
+npm install -g @railway/cli
+
+railway login
+railway init
+railway up
+```
+
+**3. Railway 환경변수 설정**
+
+```dotenv
+DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/vulnix
+REDIS_URL=redis://default:pass@host:port
+
+GITHUB_APP_ID=
+GITHUB_APP_PRIVATE_KEY=
+GITHUB_WEBHOOK_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+
+ANTHROPIC_API_KEY=
+
+JWT_SECRET_KEY=        # openssl rand -hex 32
+TOKEN_ENCRYPTION_KEY=  # python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+CORS_ORIGINS=https://your-app.vercel.app
+APP_ENV=production
+DEBUG=false
+```
+
+**4. DB 마이그레이션**
+
+```bash
+railway run alembic upgrade head
+```
+
+**5. 워커 프로세스 추가** (Railway 서비스 하나 더 생성)
+
+```bash
+# Start Command:
+python -m src.workers.scan_worker
+```
+
+---
+
+### 프론트엔드 — Vercel
+
+```bash
+cd frontend
+npm install -g vercel
+
+vercel
+# 또는 GitHub 저장소 연결 후 자동 배포
+```
+
+Vercel 환경변수:
+
+```dotenv
+NEXT_PUBLIC_API_URL=https://your-backend.railway.app
+```
+
+---
+
+### DB — Supabase
+
+1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
+2. `Settings → Database` 에서 Connection String 복사
+3. `DATABASE_URL`에 `postgresql+asyncpg://...` 형식으로 설정
+
+---
+
+### Redis — Upstash
+
+1. [upstash.com](https://upstash.com) 에서 Redis 데이터베이스 생성
+2. `REDIS_URL`에 `redis://default:...@...upstash.io:port` 설정
+
+---
+
+### GitHub App 설정
+
+1. GitHub → Settings → Developer settings → GitHub Apps → New GitHub App
+2. 아래 권한 설정:
+   - **Repository permissions**: Contents (Read & Write), Pull requests (Read & Write), Webhooks (Read & Write)
+   - **Subscribe to events**: Push, Pull request
+3. Webhook URL: `https://your-backend.railway.app/api/v1/webhooks/github`
+4. Private key 생성 후 `GITHUB_APP_PRIVATE_KEY`에 PEM 내용 설정
+
+---
+
+### 프로덕션 체크리스트
+
+- [ ] `JWT_SECRET_KEY` — `openssl rand -hex 32` 로 생성
+- [ ] `TOKEN_ENCRYPTION_KEY` — Fernet 키 생성 (위 명령 참고)
+- [ ] `DEBUG=false`, `APP_ENV=production`
+- [ ] `CORS_ORIGINS` — 실제 프론트엔드 도메인만 허용
+- [ ] HTTPS 적용 (Railway/Vercel 자동 제공)
+- [ ] GitHub App Webhook Secret 설정
+
+---
+
 ## VS Code 익스텐션
 
 ### 동작 방식
