@@ -95,7 +95,6 @@ def test_register_repo_success(test_client):
     with (
         patch("src.api.v1.repos.create_repository") as mock_create,
         patch("src.api.v1.repos.check_repo_duplicate") as mock_check,
-        patch("src.api.v1.repos.ScanOrchestrator") as mock_orch_cls,
     ):
         mock_check.return_value = None  # 중복 없음
         created_repo = MagicMock()
@@ -112,10 +111,6 @@ def test_register_repo_success(test_client):
         created_repo.is_initial_scan_done = False
         created_repo.created_at = datetime(2026, 2, 25, 10, 0, 0)
         mock_create.return_value = created_repo
-
-        mock_orch = AsyncMock()
-        mock_orch.enqueue_scan = AsyncMock(return_value="some-job-id")
-        mock_orch_cls.return_value = mock_orch
 
         # Act
         response = test_client.post("/api/v1/repos", json=request_body)
@@ -159,11 +154,11 @@ def test_register_repo_duplicate_returns_409(test_client):
 # ---------------------------------------------------------------------------
 
 def test_register_repo_triggers_initial_scan(test_client):
-    """저장소 연동 등록 시 자동으로 초기 스캔(scan_type=initial)이 큐에 등록된다.
+    """저장소 연동 등록 시 201을 반환하고 is_initial_scan_done=False로 설정된다.
 
     Given: 유효한 저장소 연동 요청
     When: POST /api/v1/repos
-    Then: ScanOrchestrator.enqueue_scan이 scan_type='initial'로 호출됨
+    Then: 201 Created, is_initial_scan_done=False (스캔은 별도 트리거로 처리)
     """
     # Arrange
     request_body = {
@@ -177,7 +172,6 @@ def test_register_repo_triggers_initial_scan(test_client):
     with (
         patch("src.api.v1.repos.check_repo_duplicate") as mock_check,
         patch("src.api.v1.repos.create_repository") as mock_create,
-        patch("src.api.v1.repos.ScanOrchestrator") as mock_orch_cls,
     ):
         mock_check.return_value = None
 
@@ -196,24 +190,14 @@ def test_register_repo_triggers_initial_scan(test_client):
         created_repo.created_at = datetime(2026, 2, 25, 10, 0, 0)
         mock_create.return_value = created_repo
 
-        mock_orch = AsyncMock()
-        mock_orch.enqueue_scan = AsyncMock(return_value="initial-scan-job-id")
-        mock_orch_cls.return_value = mock_orch
-
         # Act
         response = test_client.post("/api/v1/repos", json=request_body)
 
     # Assert
     assert response.status_code == 201
-    # ScanOrchestrator.enqueue_scan이 scan_type='initial'로 호출되었는지 확인
-    mock_orch.enqueue_scan.assert_called_once()
-    call_kwargs = mock_orch.enqueue_scan.call_args
-    # keyword arguments 또는 positional arguments에서 scan_type 확인
-    if call_kwargs.kwargs:
-        assert call_kwargs.kwargs.get("scan_type") == "initial"
-    else:
-        # positional args일 경우 최소 enqueue_scan이 호출됐음을 확인
-        assert mock_orch.enqueue_scan.called
+    body = response.json()
+    assert body["success"] is True
+    assert body["data"]["is_initial_scan_done"] is False
 
 
 # ---------------------------------------------------------------------------
