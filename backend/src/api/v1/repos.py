@@ -18,7 +18,6 @@ from src.schemas.repository import RepositoryRegisterRequest, RepositoryResponse
 from src.schemas.scan import ScanJobResponse
 from src.schemas.vulnerability import VulnerabilitySummary
 from src.services.github_app import GitHubAppService
-from src.services.scan_orchestrator import ScanOrchestrator
 
 router = APIRouter()
 
@@ -276,7 +275,7 @@ async def register_repo(
     db: DbSession,
     locale: CurrentLocale,
 ) -> ApiResponse[RepositoryResponse]:
-    """저장소를 연동 등록하고 초기 스캔을 큐에 등록한다."""
+    """저장소를 연동 등록한다. 스캔 큐 등록은 별도 트리거로 처리."""
     # 중복 확인
     existing = await check_repo_duplicate(db=db, github_repo_id=request.github_repo_id)
     if existing is not None:
@@ -292,25 +291,12 @@ async def register_repo(
             select(TeamMember.team_id).where(TeamMember.user_id == current_user.id).limit(1)
         )
         raw_team_id = team_result.scalar_one_or_none()
-        # UUID 타입인 경우만 사용, 아니면 새 UUID 생성
         team_id = raw_team_id if isinstance(raw_team_id, uuid.UUID) else uuid.uuid4()
     except Exception:
         team_id = uuid.uuid4()
 
-    # 저장소 생성 후 즉시 커밋 (스캔 큐 실패해도 저장소는 보존)
+    # 저장소 생성 (Redis/스캔 의존성 없음 — 연동 자체는 항상 성공)
     repo = await create_repository(db=db, repo_data=request, team_id=team_id)
-    await db.commit()
-
-    # 초기 스캔 큐 등록 — Redis 미설정 시 건너뜀 (저장소 연동은 유지)
-    try:
-        orchestrator = ScanOrchestrator(db=db)
-        await orchestrator.enqueue_scan(
-            repo_id=repo.id,
-            trigger="manual",
-            scan_type="initial",
-        )
-    except Exception as e:
-        logger.warning("[register_repo] 초기 스캔 큐 등록 실패 (저장소는 연동됨): %s", e)
 
     return ApiResponse(
         success=True,
