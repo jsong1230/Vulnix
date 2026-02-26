@@ -115,6 +115,26 @@ class GitHubAppService:
 
         return token
 
+    async def get_all_installations(self) -> list[dict]:
+        """GitHub App에 설치된 모든 installation 목록을 조회한다.
+
+        Returns:
+            installation 정보 목록 (id, account, ...)
+        """
+        jwt_token = self._generate_jwt()
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://api.github.com/app/installations",
+                headers={
+                    "Authorization": f"Bearer {jwt_token}",
+                    "Accept": "application/vnd.github+json",
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+                params={"per_page": 100},
+            )
+            response.raise_for_status()
+            return response.json()
+
     async def get_installation_repos(self, installation_id: int) -> list[dict]:
         """GitHub App 설치에서 접근 가능한 저장소 목록을 조회한다.
 

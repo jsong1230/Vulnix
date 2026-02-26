@@ -164,18 +164,25 @@ async def list_github_installations(
     """
     github_service = GitHubAppService()
 
-    # 사용자의 installation_id 조회 (PoC: 첫 번째 저장소의 installation_id 사용)
+    # GitHub App API에서 installation_id 조회 (DB가 비어있어도 동작)
     try:
-        result = await db.execute(
-            select(Repository.installation_id).where(
-                Repository.installation_id.isnot(None),
-            ).limit(1)
-        )
-        raw_installation_id = result.scalar_one_or_none()
-        # Mock이나 잘못된 타입을 int로 변환 시도, 실패하면 0 사용
-        installation_id = int(raw_installation_id) if isinstance(raw_installation_id, int) else 0
+        installations = await github_service.get_all_installations()
+        installation_id = installations[0]["id"] if installations else 0
     except Exception:
-        installation_id = 0
+        # fallback: DB에서 조회
+        try:
+            result = await db.execute(
+                select(Repository.installation_id).where(
+                    Repository.installation_id.isnot(None),
+                ).limit(1)
+            )
+            raw = result.scalar_one_or_none()
+            installation_id = int(raw) if isinstance(raw, int) else 0
+        except Exception:
+            installation_id = 0
+
+    if installation_id == 0:
+        raise HTTPException(status_code=404, detail="GitHub App이 설치되지 않았습니다.")
 
     # GitHub API로 접근 가능한 저장소 목록 조회
     github_repos = await github_service.get_installation_repos(
