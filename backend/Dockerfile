@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 의존성 파일 복사 및 설치
 COPY pyproject.toml .
-RUN pip install --upgrade pip && \
+RUN pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -e .
 
 # ---- 런타임 이미지 ----
@@ -33,9 +33,6 @@ COPY pyproject.toml .
 COPY src/ ./src/
 COPY alembic/ ./alembic/
 COPY alembic.ini .
-
-# rules 디렉토리 복사 (Semgrep 커스텀 룰)
-COPY src/rules/ ./src/rules/
 
 # 소유권 변경
 RUN chown -R vulnix:vulnix /app
