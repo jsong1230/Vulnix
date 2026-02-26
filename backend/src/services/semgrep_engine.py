@@ -93,9 +93,9 @@ class SemgrepEngine:
             RuntimeError: Semgrep 미설치, 타임아웃, 내부 에러 시
         """
         # Railway 컨테이너에서 ~/.semgrep/ 캐시 디렉토리 생성 실패를 막기 위해
-        # HOME=/tmp 설정 및 메트릭/버전 체크 비활성화
+        # HOME=/tmp 강제 설정 (기존 /root 등 쓰기 불가 경로 덮어쓰기)
         env = os.environ.copy()
-        env.setdefault("HOME", "/tmp")
+        env["HOME"] = "/tmp"
         env["SEMGREP_SEND_METRICS"] = "off"
         env["SEMGREP_ENABLE_VERSION_CHECK"] = "0"
 
@@ -139,7 +139,7 @@ class SemgrepEngine:
         except json.JSONDecodeError:
             logger.warning(
                 f"[SemgrepEngine] JSON 파싱 실패, 빈 findings 반환. "
-                f"output(100자)={output[:100]!r}"
+                f"output(500자)={output[:500]!r}"
             )
             return {"results": [], "errors": []}
 
