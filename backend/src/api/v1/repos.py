@@ -297,16 +297,20 @@ async def register_repo(
     except Exception:
         team_id = uuid.uuid4()
 
-    # 저장소 생성
+    # 저장소 생성 후 즉시 커밋 (스캔 큐 실패해도 저장소는 보존)
     repo = await create_repository(db=db, repo_data=request, team_id=team_id)
+    await db.commit()
 
-    # 초기 스캔 큐 등록
-    orchestrator = ScanOrchestrator(db=db)
-    await orchestrator.enqueue_scan(
-        repo_id=repo.id,
-        trigger="manual",
-        scan_type="initial",
-    )
+    # 초기 스캔 큐 등록 — Redis 미설정 시 건너뜀 (저장소 연동은 유지)
+    try:
+        orchestrator = ScanOrchestrator(db=db)
+        await orchestrator.enqueue_scan(
+            repo_id=repo.id,
+            trigger="manual",
+            scan_type="initial",
+        )
+    except Exception as e:
+        logger.warning("[register_repo] 초기 스캔 큐 등록 실패 (저장소는 연동됨): %s", e)
 
     return ApiResponse(
         success=True,
