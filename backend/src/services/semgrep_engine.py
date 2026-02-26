@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import shutil
 import subprocess
 from dataclasses import dataclass, field
@@ -91,12 +92,20 @@ class SemgrepEngine:
         Raises:
             RuntimeError: Semgrep 미설치, 타임아웃, 내부 에러 시
         """
+        # Railway 컨테이너에서 ~/.semgrep/ 캐시 디렉토리 생성 실패를 막기 위해
+        # HOME=/tmp 설정 및 메트릭/버전 체크 비활성화
+        env = os.environ.copy()
+        env.setdefault("HOME", "/tmp")
+        env["SEMGREP_SEND_METRICS"] = "off"
+        env["SEMGREP_ENABLE_VERSION_CHECK"] = "0"
+
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=600,  # 전체 실행 타임아웃 10분
+                env=env,
             )
         except subprocess.TimeoutExpired as e:
             raise RuntimeError(f"Semgrep 실행 타임아웃 (600초 초과): {e}") from e
