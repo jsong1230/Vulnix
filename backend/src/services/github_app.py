@@ -263,8 +263,63 @@ class GitHubAppService:
         commit_sha: str,
         target_dir: Path,
     ) -> None:
-        """저장소를 특정 커밋 기준으로 임시 디렉토리에 클론한다."""
-        raise NotImplementedError("TODO: 저장소 클론 구현")
+        """저장소를 특정 커밋 기준으로 임시 디렉토리에 다운로드한다.
+
+        GitHub API의 tarball 엔드포인트를 사용해 git 바이너리 없이 저장소를
+        다운로드하고 target_dir에 압축 해제한다. private repo도 지원.
+
+        Args:
+            full_name: 저장소 전체 이름 (예: org/repo-name)
+            installation_id: GitHub App 설치 ID
+            commit_sha: 대상 커밋 SHA (빈 문자열이면 HEAD 사용)
+            target_dir: 압축 해제할 로컬 디렉토리 경로
+        """
+        import tarfile
+        import tempfile
+
+        token = await self.get_installation_token(installation_id)
+        ref = commit_sha if commit_sha else "HEAD"
+
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        # GitHub API tarball 다운로드 (리다이렉트 자동 추적)
+        async with httpx.AsyncClient(follow_redirects=True, timeout=120.0) as client:
+            response = await client.get(
+                f"https://api.github.com/repos/{full_name}/tarball/{ref}",
+                headers={
+                    "Authorization": f"token {token}",
+                    "Accept": "application/vnd.github+json",
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+            )
+            response.raise_for_status()
+            tarball_bytes = response.content
+
+        # 임시 파일에 tarball 저장 후 압축 해제
+        with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tmp:
+            tmp.write(tarball_bytes)
+            tmp_path = Path(tmp.name)
+
+        try:
+            with tarfile.open(tmp_path, "r:gz") as tar:
+                members = tar.getmembers()
+                if not members:
+                    raise RuntimeError(f"빈 tarball: {full_name}@{ref}")
+
+                # GitHub tarball의 루트 디렉토리 이름 (예: owner-repo-abc1234/)
+                root_prefix = members[0].name.split("/")[0] + "/"
+
+                # 루트 디렉토리를 제거하고 target_dir에 직접 추출
+                for member in members:
+                    if member.name.startswith(root_prefix):
+                        member.name = member.name[len(root_prefix):]
+                    if not member.name:
+                        continue
+                    tar.extract(member, path=target_dir, filter="data")
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+        logger.info(f"[GitHubApp] 저장소 클론 완료: {full_name}@{ref} → {target_dir}")
 
     async def create_patch_pr(
         self,
