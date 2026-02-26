@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Annotated, AsyncGenerator
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Cookie, Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy import select
@@ -52,8 +52,12 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
+    access_token: Annotated[str | None, Cookie(alias="access_token")] = None,
 ) -> User:
-    """JWT Bearer 토큰을 검증하고 현재 사용자를 반환한다.
+    """JWT Bearer 토큰 또는 access_token 쿠키를 검증하고 현재 사용자를 반환한다.
+
+    인증 우선순위: Authorization: Bearer > access_token 쿠키
+    (프론트엔드가 Next.js 프록시 경유 시 쿠키로 전달됨)
 
     Raises:
         HTTPException: 401 - 유효하지 않은 토큰 또는 사용자 없음
@@ -64,13 +68,20 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    if credentials is None:
+    # Bearer 헤더 우선, 없으면 쿠키에서 토큰 추출
+    token: str | None = None
+    if credentials is not None:
+        token = credentials.credentials
+    elif access_token is not None:
+        token = access_token
+
+    if token is None:
         raise credentials_exception
 
-    # Bearer 토큰에서 JWT 디코드
+    # JWT 디코드
     try:
         payload = jwt.decode(
-            credentials.credentials,
+            token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )

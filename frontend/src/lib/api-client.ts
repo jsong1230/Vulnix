@@ -40,12 +40,14 @@ export class ApiError extends Error {
  */
 const createApiClient = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000',
+    // 상대 경로 사용 → Next.js rewrites가 /api/v1/* 를 Railway로 프록시
+    // (직접 크로스 오리진 호출 시 HttpOnly 쿠키가 Railway 도메인으로 전송 불가)
+    baseURL: '',
     headers: {
       'Content-Type': 'application/json',
     },
     timeout: 30000, // 30초 타임아웃
-    // HttpOnly 쿠키 자동 전송을 위해 credentials 포함
+    // 동일 오리진 요청에 쿠키 포함 (Next.js 프록시 경유)
     withCredentials: true,
   });
 
