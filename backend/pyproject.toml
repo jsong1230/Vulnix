@@ -19,6 +19,7 @@ dependencies = [
     "rq>=1.16.0",
     "redis>=5.0.0",
     "python-multipart>=0.0.9",
+    "semgrep>=1.70.0",
 ]
 
 [project.optional-dependencies]
