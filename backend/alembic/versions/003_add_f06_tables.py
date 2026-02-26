@@ -7,7 +7,7 @@ Create Date: 2026-02-25
 변경사항:
 - false_positive_pattern 테이블 신규 생성
 - false_positive_log 테이블 신규 생성
-- scan_job.auto_filtered_count 컬럼 추가
+- scan_job.auto_filtered_count 컬럼은 000_initial_schema 에서 이미 생성됨 (여기서는 생략)
 - idx_fp_pattern_team_active 인덱스 추가
 - idx_fp_pattern_rule_id 인덱스 추가
 - idx_fp_log_pattern 인덱스 추가
@@ -168,21 +168,11 @@ def upgrade() -> None:
         postgresql_ops={"filtered_at": "DESC"},
     )
 
-    # scan_job: auto_filtered_count 컬럼 추가
-    op.add_column(
-        "scan_job",
-        sa.Column(
-            "auto_filtered_count",
-            sa.Integer(),
-            nullable=False,
-            server_default=sa.text("0"),
-            comment="오탐 패턴으로 자동 필터링된 건수",
-        ),
-    )
+    # scan_job.auto_filtered_count 는 000_initial_schema 에서 이미 생성됨 — 추가 생략
 
 
 def downgrade() -> None:
-    op.drop_column("scan_job", "auto_filtered_count")
+    # scan_job.auto_filtered_count 는 000_initial_schema 에서 생성됐으므로 여기서 drop 불필요
 
     op.drop_index("idx_fp_log_filtered_at", table_name="false_positive_log")
     op.drop_index("idx_fp_log_scan", table_name="false_positive_log")
