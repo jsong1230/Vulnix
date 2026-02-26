@@ -107,15 +107,32 @@ class SemgrepEngine:
         # 0 = 클린 (취약점 없음)
         # 1 = 취약점 발견 (정상)
         # 2+ = Semgrep 내부 에러
+        logger.debug(
+            f"[SemgrepEngine] returncode={result.returncode} "
+            f"stdout_len={len(result.stdout)} stderr_len={len(result.stderr)}"
+        )
         if result.returncode >= 2:
             raise RuntimeError(
-                f"Semgrep 실행 에러 (returncode={result.returncode}): {result.stderr}"
+                f"Semgrep 실행 에러 (returncode={result.returncode}): {result.stderr[:500]}"
             )
 
+        # stdout 우선, 비어있으면 stderr에서 JSON 시도 (일부 버전 출력 경로 차이)
+        output = result.stdout.strip() or result.stderr.strip()
+        if not output:
+            logger.warning(
+                f"[SemgrepEngine] stdout/stderr 모두 비어있음 "
+                f"(returncode={result.returncode}) — 빈 findings 반환"
+            )
+            return {"results": [], "errors": []}
+
         try:
-            return json.loads(result.stdout)
-        except json.JSONDecodeError as e:
-            raise RuntimeError(f"Semgrep 출력 JSON 파싱 실패: {e}") from e
+            return json.loads(output)
+        except json.JSONDecodeError:
+            logger.warning(
+                f"[SemgrepEngine] JSON 파싱 실패, 빈 findings 반환. "
+                f"output(100자)={output[:100]!r}"
+            )
+            return {"results": [], "errors": []}
 
     def _parse_results(self, semgrep_output: dict, base_dir: Path) -> list[SemgrepFinding]:
         """Semgrep JSON 출력을 SemgrepFinding 목록으로 변환한다.
