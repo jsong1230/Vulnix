@@ -116,19 +116,18 @@ class SemgrepEngine:
         # 0 = 클린 (취약점 없음)
         # 1 = 취약점 발견 (정상)
         # 2+ = Semgrep 내부 에러
-        logger.warning(
+        logger.debug(
             f"[SemgrepEngine] returncode={result.returncode} "
-            f"stdout(300자)={result.stdout[:300]!r} "
-            f"stderr(300자)={result.stderr[:300]!r}"
+            f"stdout_len={len(result.stdout)} stderr_len={len(result.stderr)}"
         )
-        if result.returncode >= 2:
-            raise RuntimeError(
-                f"Semgrep 실행 에러 (returncode={result.returncode}): {result.stderr[:500]}"
-            )
 
         # stdout 우선, 비어있으면 stderr에서 JSON 시도 (일부 버전 출력 경로 차이)
         output = result.stdout.strip() or result.stderr.strip()
         if not output:
+            if result.returncode >= 2:
+                raise RuntimeError(
+                    f"Semgrep 실행 에러 (returncode={result.returncode}): 출력 없음"
+                )
             logger.warning(
                 f"[SemgrepEngine] stdout/stderr 모두 비어있음 "
                 f"(returncode={result.returncode}) — 빈 findings 반환"
@@ -136,13 +135,28 @@ class SemgrepEngine:
             return {"results": [], "errors": []}
 
         try:
-            return json.loads(output)
+            parsed = json.loads(output)
         except json.JSONDecodeError:
+            # JSON이 아닌 출력 (예: crash traceback) — returncode >= 2면 에러
+            if result.returncode >= 2:
+                raise RuntimeError(
+                    f"Semgrep 실행 에러 (returncode={result.returncode}): "
+                    f"{output[:300]}"
+                )
             logger.warning(
                 f"[SemgrepEngine] JSON 파싱 실패, 빈 findings 반환. "
-                f"output(500자)={output[:500]!r}"
+                f"output(300자)={output[:300]!r}"
             )
             return {"results": [], "errors": []}
+
+        # JSON 파싱 성공 — returncode >= 2여도 부분 결과를 사용한다
+        # (invalid rule 에러 시 Semgrep이 exit 7이지만 유효한 JSON 반환)
+        if result.returncode >= 2 and parsed.get("errors"):
+            logger.warning(
+                f"[SemgrepEngine] Semgrep 룰 에러 (returncode={result.returncode}): "
+                f"{len(parsed['errors'])}건 — 부분 결과로 계속 진행"
+            )
+        return parsed
 
     def _parse_results(self, semgrep_output: dict, base_dir: Path) -> list[SemgrepFinding]:
         """Semgrep JSON 출력을 SemgrepFinding 목록으로 변환한다.
