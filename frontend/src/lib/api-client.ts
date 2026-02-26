@@ -74,14 +74,19 @@ const createApiClient = (): AxiosInstance => {
 
       // 401: 인증 만료 → 로그인 페이지로 리다이렉트
       // HttpOnly 쿠키 방식에서는 clear-token API Route를 통해 쿠키 삭제
+      // 단, 로그인·콜백 페이지에서는 리다이렉트 금지 (401이 정상 흐름)
       if (statusCode === 401 && typeof window !== 'undefined') {
-        // 비동기 쿠키 삭제 후 리다이렉트 (fire-and-forget)
-        fetch('/api/auth/clear-token', {
-          method: 'POST',
-          credentials: 'include',
-        }).finally(() => {
-          window.location.href = '/login';
-        });
+        const path = window.location.pathname;
+        const isAuthPage = path === '/login' || path.startsWith('/auth/');
+        if (!isAuthPage) {
+          // 비동기 쿠키 삭제 후 리다이렉트 (fire-and-forget)
+          fetch('/api/auth/clear-token', {
+            method: 'POST',
+            credentials: 'include',
+          }).finally(() => {
+            window.location.href = '/login';
+          });
+        }
         return Promise.reject(new ApiError(401, '인증이 만료되었습니다.'));
       }
 
