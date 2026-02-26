@@ -19,31 +19,53 @@ class AuthService:
     """GitHub OAuth 로그인 및 JWT 토큰 관리 서비스."""
 
     async def exchange_github_code(self, code: str) -> str:
-        """GitHub OAuth 코드를 Access Token으로 교환한다.
-
-        Args:
-            code: GitHub OAuth 인증 코드
-
-        Returns:
-            GitHub Access Token
-
-        TODO:
-        - httpx로 GitHub token endpoint POST 호출
-        - access_token 추출 및 반환
-        """
-        raise NotImplementedError("TODO: GitHub 코드 교환 구현")
+        """GitHub OAuth 코드를 Access Token으로 교환한다."""
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                GITHUB_TOKEN_URL,
+                json={
+                    "client_id": settings.GITHUB_CLIENT_ID,
+                    "client_secret": settings.GITHUB_CLIENT_SECRET,
+                    "code": code,
+                },
+                headers={"Accept": "application/json"},
+            )
+            response.raise_for_status()
+            data = response.json()
+            if "error" in data:
+                raise ValueError(data.get("error_description", data["error"]))
+            return data["access_token"]
 
     async def get_github_user(self, access_token: str) -> dict:
-        """GitHub Access Token으로 사용자 정보를 조회한다.
+        """GitHub Access Token으로 사용자 정보를 조회한다."""
+        async with httpx.AsyncClient() as client:
+            user_resp = await client.get(
+                GITHUB_USER_API_URL,
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/vnd.github.v3+json",
+                },
+            )
+            user_resp.raise_for_status()
+            user_data = user_resp.json()
 
-        Returns:
-            GitHub 사용자 정보 (id, login, email, avatar_url 등)
+            # 이메일이 비공개인 경우 /user/emails에서 primary 이메일 조회
+            if not user_data.get("email"):
+                emails_resp = await client.get(
+                    "https://api.github.com/user/emails",
+                    headers={
+                        "Authorization": f"Bearer {access_token}",
+                        "Accept": "application/vnd.github.v3+json",
+                    },
+                )
+                if emails_resp.status_code == 200:
+                    primary = next(
+                        (e["email"] for e in emails_resp.json() if e.get("primary") and e.get("verified")),
+                        None,
+                    )
+                    user_data["email"] = primary
 
-        TODO:
-        - GET /user API 호출
-        - GET /user/emails API 호출 (이메일 공개 여부에 따라)
-        """
-        raise NotImplementedError("TODO: GitHub 사용자 정보 조회 구현")
+            return user_data
 
     def create_access_token(self, user_id: str) -> str:
         """JWT Access Token을 발급한다.
