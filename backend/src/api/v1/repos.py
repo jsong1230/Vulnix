@@ -284,14 +284,24 @@ async def register_repo(
             detail=get_message("repo_already_exists", locale),
         )
 
-    # 현재 사용자의 팀 조회 (첫 번째 팀 사용, 없으면 임시 UUID)
-    from src.models.team import TeamMember
+    # 현재 사용자의 팀 조회 — 없으면 자동 생성
+    from src.models.team import Team, TeamMember
     try:
         team_result = await db.execute(
             select(TeamMember.team_id).where(TeamMember.user_id == current_user.id).limit(1)
         )
         raw_team_id = team_result.scalar_one_or_none()
-        team_id = raw_team_id if isinstance(raw_team_id, uuid.UUID) else uuid.uuid4()
+        if isinstance(raw_team_id, uuid.UUID):
+            team_id = raw_team_id
+        else:
+            # 팀이 없으면 개인 팀 자동 생성
+            new_team = Team(name=f"{current_user.github_login}'s Team", plan="starter")
+            db.add(new_team)
+            await db.flush()
+            new_member = TeamMember(team_id=new_team.id, user_id=current_user.id, role="owner")
+            db.add(new_member)
+            await db.flush()
+            team_id = new_team.id
     except Exception:
         team_id = uuid.uuid4()
 
