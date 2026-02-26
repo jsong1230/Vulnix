@@ -23,10 +23,10 @@ jobs:
         working-directory: backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service vulnix-backend
+        run: railway up --service ${{ secrets.RAILWAY_SERVICE_NAME || 'Vulnix' }}
 
       - name: DB 마이그레이션
         working-directory: backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway run alembic upgrade head
+        run: railway run --service ${{ secrets.RAILWAY_SERVICE_NAME || 'Vulnix' }} alembic upgrade head
