@@ -58,7 +58,7 @@ class GitHubAppService:
         payload = {
             "iat": iat,
             "exp": exp,
-            "iss": self._app_id,
+            "iss": str(self._app_id),  # PyJWT v2: iss must be a string
         }
 
         try:
