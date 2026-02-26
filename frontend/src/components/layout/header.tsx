@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { LanguageSwitcher } from './language-switcher';
+import { UserInfo } from './user-info';
 
 /**
  * 상단 헤더 컴포넌트
@@ -9,12 +10,6 @@ import { LanguageSwitcher } from './language-switcher';
 export async function Header() {
   const locale = await getLocale();
   const t = await getTranslations('nav');
-
-  // TODO: useQuery(() => apiClient.get('/api/v1/auth/me')) 로 교체
-  const user = null as {
-    githubLogin: string;
-    avatarUrl: string;
-  } | null;
 
   return (
     <header className="h-14 border-b border-gray-800 flex items-center justify-between px-6 shrink-0">
@@ -28,34 +23,8 @@ export async function Header() {
         {/* 언어 전환 버튼 */}
         <LanguageSwitcher currentLocale={locale} />
 
-        {user ? (
-          /* 로그인된 사용자 */
-          <div className="flex items-center gap-2">
-            {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.avatarUrl}
-                alt={user.githubLogin}
-                className="w-7 h-7 rounded-full"
-              />
-            ) : (
-              <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-xs text-gray-400">
-                  {user.githubLogin[0].toUpperCase()}
-                </span>
-              </div>
-            )}
-            <span className="text-gray-300 text-sm">{user.githubLogin}</span>
-          </div>
-        ) : (
-          /* 미로그인 상태 */
-          <a
-            href="/login"
-            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-          >
-            {t('login')}
-          </a>
-        )}
+        {/* 로그인 상태: /api/v1/auth/me 호출로 확인 */}
+        <UserInfo loginLabel={t('login')} />
       </div>
     </header>
   );

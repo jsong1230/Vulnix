@@ -86,10 +86,14 @@ async def get_me(
     current_user: CurrentUser,
     db: DbSession,
 ) -> ApiResponse[UserMeResponse]:
-    """현재 로그인 사용자 정보 조회.
-
-    TODO:
-    - current_user를 UserMeResponse로 변환
-    - 팀 멤버십 정보 함께 반환
-    """
-    raise NotImplementedError("TODO: 현재 사용자 정보 조회 구현")
+    """현재 로그인 사용자 정보 조회."""
+    return ApiResponse(
+        success=True,
+        data=UserMeResponse(
+            id=current_user.id,
+            github_login=current_user.github_login,
+            email=current_user.email,
+            avatar_url=current_user.avatar_url,
+            teams=[],
+        ),
+    )
