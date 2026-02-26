@@ -25,9 +25,8 @@ jobs:
         run: npm install -g vercel
 
       - name: Vercel 프로덕션 배포
-        working-directory: frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd frontend
