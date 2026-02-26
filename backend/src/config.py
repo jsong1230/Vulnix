@@ -64,8 +64,15 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def parse_cors_origins(cls, value: str | list[str]) -> list[str]:
-        """환경변수 문자열을 리스트로 변환 (쉼표 구분)"""
+        """환경변수 문자열을 리스트로 변환 (JSON 배열 또는 쉼표 구분 지원)"""
         if isinstance(value, str):
+            import json
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    return [str(o).strip() for o in parsed if str(o).strip()]
+            except (json.JSONDecodeError, ValueError):
+                pass
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
 
