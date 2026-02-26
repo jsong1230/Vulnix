@@ -64,8 +64,13 @@ const createApiClient = (): AxiosInstance => {
     (response) => response,
     (error: AxiosError<ApiResponse>) => {
       const statusCode = error.response?.status ?? 0;
+      // FastAPI는 {"detail": "..."} 형식, 커스텀 응답은 {"error": "..."} 형식
+      const data = error.response?.data as Record<string, unknown> | undefined;
       const serverMessage =
-        error.response?.data?.error ?? error.message ?? '알 수 없는 오류';
+        (data?.error as string) ??
+        (data?.detail as string) ??
+        error.message ??
+        '알 수 없는 오류';
 
       // 401: 인증 만료 → 로그인 페이지로 리다이렉트
       // HttpOnly 쿠키 방식에서는 clear-token API Route를 통해 쿠키 삭제

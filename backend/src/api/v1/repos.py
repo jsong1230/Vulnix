@@ -1,8 +1,11 @@
 """저장소 관련 엔드포인트"""
 
+import logging
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
+
+logger = logging.getLogger(__name__)
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -165,10 +168,13 @@ async def list_github_installations(
     github_service = GitHubAppService()
 
     # GitHub App API에서 installation_id 조회 (DB가 비어있어도 동작)
+    github_api_error: str | None = None
     try:
         installations = await github_service.get_all_installations()
         installation_id = installations[0]["id"] if installations else 0
-    except Exception:
+    except Exception as e:
+        github_api_error = str(e)
+        logger.warning("[repos] get_all_installations 실패, DB 폴백 시도: %s", e)
         # fallback: DB에서 조회
         try:
             result = await db.execute(
@@ -182,7 +188,10 @@ async def list_github_installations(
             installation_id = 0
 
     if installation_id == 0:
-        raise HTTPException(status_code=404, detail="GitHub App이 설치되지 않았습니다.")
+        detail = "GitHub App이 설치되지 않았거나 인증 정보를 확인할 수 없습니다."
+        if github_api_error:
+            detail = f"GitHub App API 오류: {github_api_error}"
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
 
     # GitHub API로 접근 가능한 저장소 목록 조회
     github_repos = await github_service.get_installation_repos(
