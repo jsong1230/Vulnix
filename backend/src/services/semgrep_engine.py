@@ -116,9 +116,10 @@ class SemgrepEngine:
         # 0 = 클린 (취약점 없음)
         # 1 = 취약점 발견 (정상)
         # 2+ = Semgrep 내부 에러
-        logger.debug(
+        logger.warning(
             f"[SemgrepEngine] returncode={result.returncode} "
-            f"stdout_len={len(result.stdout)} stderr_len={len(result.stderr)}"
+            f"stdout(300자)={result.stdout[:300]!r} "
+            f"stderr(300자)={result.stderr[:300]!r}"
         )
         if result.returncode >= 2:
             raise RuntimeError(
