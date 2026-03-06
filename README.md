@@ -5,8 +5,11 @@
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110-green?logo=fastapi)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=nextdotjs)](https://nextjs.org)
-[![Tests](https://img.shields.io/badge/Tests-518%20passed-brightgreen)](#테스트-실행)
+[![Backend Tests](https://img.shields.io/badge/Backend%20Tests-518%20passed-brightgreen)](#테스트-실행)
+[![E2E Tests](https://img.shields.io/badge/E2E%20Tests-33%20passed-brightgreen)](#테스트-실행)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+
+**🔗 라이브 서비스**: https://vulnix-five.vercel.app
 
 코드 저장소를 연동하면 **Semgrep + Claude AI** 2단계 엔진이 취약점을 찾고, **패치 PR까지 자동으로 생성**해주는 개발자용 보안 에이전트 SaaS입니다.
 
@@ -595,16 +598,24 @@ Vulnix/
 
 ### 백엔드 — Railway
 
+GitHub 저장소를 Railway 프로젝트에 연결하면 `main` 브랜치 push 시 자동 배포됩니다.
+
 ```bash
-# 1. Docker 이미지 빌드 확인
+# 로컬에서 Docker 이미지 빌드 확인
 cd backend
 docker build -t vulnix-backend .
+```
 
-# 2. Railway CLI 배포
-npm install -g @railway/cli
-railway login
-railway init
-railway up
+`backend/railway.toml`에 Dockerfile 빌더가 명시되어 있습니다:
+
+```toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "sh -c 'alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}'"
+healthcheckPath = "/health"
 ```
 
 Railway 환경변수 (`railway variables set KEY=VALUE`):
@@ -650,7 +661,7 @@ npx vercel
 Vercel 환경변수:
 
 ```dotenv
-NEXT_PUBLIC_API_URL=https://your-backend.railway.app
+NEXT_PUBLIC_API_URL=https://vulnix-production.up.railway.app
 ```
 
 ### DB — Supabase
@@ -695,6 +706,11 @@ pytest tests/ -v
 
 # 백엔드 (커버리지 포함)
 pytest tests/ --cov=src --cov-report=html
+
+# 프론트엔드 E2E (Playwright)
+cd frontend
+npm run test:e2e
+# 33 passed
 
 # VS Code 익스텐션
 cd vscode-extension
