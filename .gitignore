@@ -68,3 +68,4 @@ out/
 *.bak
 tmp/
 temp/
+test-results/
