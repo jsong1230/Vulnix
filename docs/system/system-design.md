@@ -1,8 +1,9 @@
 # 시스템 설계서 — Vulnix
 
-**버전**: v1.0
+**버전**: v1.1
 **작성일**: 2026-02-25
-**상태**: 확정 (PoC 기준)
+**최종 수정**: 2026-03-06
+**상태**: 확정 (F-01~F-11 전체 완료)
 
 ---
 
@@ -28,8 +29,8 @@
 
 ### 1-3. 배포 전략
 
-- **Backend**: Railway (단일 서비스 + 워커 프로세스)
-- **Frontend**: Vercel (Next.js 자동 배포)
+- **Backend**: Railway — `https://vulnix-production.up.railway.app` (GitHub main 브랜치 push 시 네이티브 자동배포)
+- **Frontend**: Vercel — `https://vulnix-five.vercel.app` (GitHub main 브랜치 push 시 자동배포)
 - **DB**: Supabase (관리형 PostgreSQL)
 - **캐시/큐**: Upstash Redis (서버리스 Redis)
 
@@ -730,7 +731,10 @@ Vulnix/
 │   └── db/                           # DB 스키마 확정본
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                    # CI 파이프라인
+│       ├── ci.yml                    # CI 파이프라인
+│       ├── deploy-frontend.yml       # Vercel 프론트엔드 배포
+│       ├── deploy-worker.yml         # Railway 스캔 워커 배포
+│       └── security-scan.yml         # 자체 보안 스캔
 ├── docker-compose.yml                # 로컬 개발 환경
 └── .env.example                      # 환경변수 템플릿
 ```
@@ -793,12 +797,12 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### 8-3. 테스트 전략
 
-| 레벨 | 도구 | 대상 |
-|------|------|------|
-| 단위 테스트 | pytest | 서비스 로직, Semgrep 결과 파싱, LLM 응답 파싱 |
-| 통합 테스트 | pytest + httpx | API 엔드포인트, DB 연동 |
-| E2E 테스트 | Playwright | 프론트엔드 핵심 흐름 |
-| 보안 테스트 | Semgrep (자체 적용) | 자사 코드 보안 검증 |
+| 레벨 | 도구 | 대상 | 현황 |
+|------|------|------|------|
+| 단위 테스트 | pytest | 서비스 로직, Semgrep 결과 파싱, LLM 응답 파싱 | 518개 PASS |
+| 통합 테스트 | pytest + httpx | API 엔드포인트, DB 연동 | 포함됨 |
+| E2E 테스트 | Playwright | 프론트엔드 핵심 흐름 | 33개 PASS |
+| 보안 테스트 | Semgrep (자체 적용) | 자사 코드 보안 검증 | CI 자동화 |
 
 **테스트 실행**:
 
@@ -806,8 +810,8 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 # Backend 단위 + 통합 테스트
 cd backend && pytest
 
-# Frontend E2E 테스트
-cd frontend && npx playwright test
+# Frontend E2E 테스트 (Playwright)
+cd frontend && npm run test:e2e
 ```
 
 ### 8-4. DB 마이그레이션
@@ -845,9 +849,9 @@ cd backend && alembic upgrade head
 ### 9-3. CORS 정책
 
 ```python
-# PoC 단계
+# 프로덕션
 origins = [
-    "http://localhost:3000",        # 로컬 개발
-    "https://vulnix.vercel.app",    # 프로덕션
+    "http://localhost:3000",             # 로컬 개발
+    "https://vulnix-five.vercel.app",   # 프로덕션 (Vercel)
 ]
 ```
