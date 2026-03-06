@@ -1,3 +1,7 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
 [deploy]
 startCommand = "python -m src.workers.scan_worker"
 restartPolicyType = "ON_FAILURE"
