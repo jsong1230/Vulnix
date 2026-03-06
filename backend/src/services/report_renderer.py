@@ -379,7 +379,11 @@ class ISO27001ReportRenderer(ReportRenderer):
             )
             return
 
-        doc = SimpleDocTemplate(output_path, pagesize=A4)
+        doc = SimpleDocTemplate(
+            output_path, pagesize=A4,
+            title="ISO 27001 A.12.6.1 A.14.2.1",
+            subject="ISO 27001 Annex A Technical Vulnerability Management",
+        )
         styles = getSampleStyleSheet()
         story = []
 
@@ -470,7 +474,11 @@ class ISMSReportRenderer(ReportRenderer):
             )
             return
 
-        doc = SimpleDocTemplate(output_path, pagesize=A4)
+        doc = SimpleDocTemplate(
+            output_path, pagesize=A4,
+            title="ISMS-P 2.10.4 2.11.5",
+            subject="ISMS-P 인증 증적 취약점 점검 소스코드 보안",
+        )
         styles = getSampleStyleSheet()
         story = []
 
